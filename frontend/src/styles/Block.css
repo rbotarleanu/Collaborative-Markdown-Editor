@@ -1,0 +1,8 @@
+
+.Block {
+    text-align: justify;
+    border-style: groove;
+    border-color: paleturquoise;
+    margin-top: 10px;
+    color: white;
+}
