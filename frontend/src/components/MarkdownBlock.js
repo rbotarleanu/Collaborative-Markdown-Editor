@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import '../styles/Block.css';
+import '../styles/MarkdownBlock.css';
+import TextareaAutosize from 'react-textarea-autosize';
 
 export default class MarkdownBlock extends Component {
 
@@ -7,12 +8,21 @@ export default class MarkdownBlock extends Component {
         super(props);
         this.state = {text: props.text};
         this.id = props.id;
+
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(e) {
+        this.setState({text: e.target.value});
     }
 
     render() {
         return (
-            <div className="Block" id="block">
-                {this.state.text}
+            <div className="MarkdownBlock" id="block">
+                <TextareaAutosize
+                    value={this.state.text}
+                    onChange={this.handleChange}
+                />
             </div>
         )
     }

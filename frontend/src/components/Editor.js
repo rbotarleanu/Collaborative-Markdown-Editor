@@ -11,7 +11,7 @@ export default class Editor extends Component {
         this.state = {
             editor: {
                 paragraphs: [
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
                     "Nam quis hendrerit sem, eu vestibulum nibh.",
                     "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",

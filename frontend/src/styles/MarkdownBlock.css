@@ -1,8 +1,14 @@
 
-.Block {
+.MarkdownBlock {
     text-align: justify;
     border-style: groove;
     border-color: paleturquoise;
     margin-top: 10px;
     color: white;
+    height: auto;
+}
+
+textarea {
+    width: 100%;
+    resize: none;
 }
