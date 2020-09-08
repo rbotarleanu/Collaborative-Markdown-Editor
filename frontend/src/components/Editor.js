@@ -78,11 +78,26 @@ export default class Editor extends Component {
                 }
             }
         };
+
+        this.blockRefs = {};
+        this.handleBlockFocus = this.handleBlockFocus.bind(this);
+    }
+
+    handleBlockFocus(focusedBlockIdx) {
+        Object.keys(this.blockRefs).forEach((idx) => {
+            idx = parseInt(idx);
+            if (idx === focusedBlockIdx) {
+                return;
+            }
+            
+            this.blockRefs[idx].handleOffFocus();
+        })
     }
 
     render() {
         return (
-            <div className="Editor" id="editor">
+            <div className="Editor" id="editor"
+                onClick={(e) => {this.handleBlockFocus(-1)}}>
                 <div className="TextBlocks">
                     {
                         this.state.editor.paragraphs.map((paragraph, idx) => {
@@ -91,6 +106,8 @@ export default class Editor extends Component {
                                     text={paragraph}
                                     id={idx}
                                     key={idx}
+                                    notifyFocus={this.handleBlockFocus}
+                                    ref={(ref) => this.blockRefs[idx]=ref}
                                 /> 
                             )
                         })
