@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import '../styles/MarkdownBlock.css';
 import PlainTextBlock from './PlainTextBlock.js';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes.js';
+import HeadingBlock from './HeadingBlock';
 
 
 export default class RenderableMarkdownBlock extends Component {
@@ -48,6 +49,16 @@ export default class RenderableMarkdownBlock extends Component {
         let blockType = this.interpretBlockType(this.state.text);
 
         switch (blockType) {
+            case MarkdownBlockTypes.H1:
+                return (<HeadingBlock text={this.state.text} headingLevel={1}/>)
+            case MarkdownBlockTypes.H2:
+                return (<HeadingBlock text={this.state.text} headingLevel={2}/>)
+            case MarkdownBlockTypes.H3:
+                return (<HeadingBlock text={this.state.text} headingLevel={3}/>)
+            case MarkdownBlockTypes.H4:
+                return (<HeadingBlock text={this.state.text} headingLevel={4}/>)
+            case MarkdownBlockTypes.H5:
+                return (<HeadingBlock text={this.state.text} headingLevel={5}/>)                
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }
