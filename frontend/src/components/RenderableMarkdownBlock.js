@@ -3,6 +3,7 @@ import '../styles/MarkdownBlock.css';
 import PlainTextBlock from './PlainTextBlock.js';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes.js';
 import HeadingBlock from './HeadingBlock';
+import UnorderedListBlock from './UnorderedListBlock';
 
 
 export default class RenderableMarkdownBlock extends Component {
@@ -41,6 +42,12 @@ export default class RenderableMarkdownBlock extends Component {
         if (text.startsWith('#')) {
             return MarkdownBlockTypes.H1;
         }
+        if (text.startsWith('-')) {
+            return MarkdownBlockTypes.UNORDERED_LIST;
+        }
+        if (text.startsWith('1.')) {
+            return MarkdownBlockTypes.ORDERED_LIST;
+        }
 
         return MarkdownBlockTypes.PLAIN_TEXT;
     }
@@ -59,6 +66,8 @@ export default class RenderableMarkdownBlock extends Component {
                 return (<HeadingBlock text={this.state.text} headingLevel={4}/>)
             case MarkdownBlockTypes.H5:
                 return (<HeadingBlock text={this.state.text} headingLevel={5}/>)
+            case MarkdownBlockTypes.UNORDERED_LIST:
+                return (<UnorderedListBlock text={this.state.text}/>)
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }

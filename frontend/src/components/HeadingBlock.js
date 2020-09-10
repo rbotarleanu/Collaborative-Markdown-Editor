@@ -43,7 +43,7 @@ export default class HeadingBlock extends Component {
 
     render() {
         return (
-            <div className="PlainTextBlock">
+            <div className="HeadingBlock">
                 {this.renderHeading(this.state.text, this.state.headingLevel)}
             </div>
         )
