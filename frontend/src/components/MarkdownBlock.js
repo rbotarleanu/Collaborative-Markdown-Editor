@@ -9,9 +9,12 @@ export default class MarkdownBlock extends Component {
         super(props);
         this.state = {
             text: props.text,
-            inFocus: false
+            inFocus: false,
+            cursorPos: {x: 0, y: 0}
         };
         this.id = props.id;
+
+        this.textAreaRef = null;
 
         this.notifyInFocus = props.notifyFocus;
         this.handleChange = this.handleChange.bind(this);
@@ -24,8 +27,8 @@ export default class MarkdownBlock extends Component {
     }
 
     handleOnFocus() {
-        this.setState({inFocus: true});
         this.notifyInFocus(this.id);
+        this.setState({inFocus: true});
     }
 
     handleOffFocus() {
@@ -38,12 +41,13 @@ export default class MarkdownBlock extends Component {
                 {this.state.inFocus && 
                     <TextareaAutosize
                         value={this.state.text}
-                        onChange={this.handleChange}
+                        onChange={(e) => {this.handleChange(e);}}
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             this.handleOnFocus();
                         }}
+                        ref={ref => this.textAreaRef=ref}
                     />
                 }
                 {!this.state.inFocus &&

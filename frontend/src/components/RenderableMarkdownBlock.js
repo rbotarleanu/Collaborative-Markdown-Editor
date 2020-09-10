@@ -58,7 +58,7 @@ export default class RenderableMarkdownBlock extends Component {
             case MarkdownBlockTypes.H4:
                 return (<HeadingBlock text={this.state.text} headingLevel={4}/>)
             case MarkdownBlockTypes.H5:
-                return (<HeadingBlock text={this.state.text} headingLevel={5}/>)                
+                return (<HeadingBlock text={this.state.text} headingLevel={5}/>)
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }
@@ -66,7 +66,8 @@ export default class RenderableMarkdownBlock extends Component {
 
     render() {
         return (
-            <div className="RenderableMarkdownBlock" onClick={(e) => {this.handleFocus(e)}}>
+            <div className="RenderableMarkdownBlock"
+                onMouseEnter={(e) => {this.handleFocus(e)}}>
                 {this.interpretAndRender()}
             </div>
         )
