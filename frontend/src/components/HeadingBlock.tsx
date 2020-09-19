@@ -1,9 +1,20 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 
-export default class HeadingBlock extends Component {
+interface Props {
+    text: string,
+    headingLevel: number
+};
 
-    PREFIXES = {
+interface State {
+    text: string,
+    headingLevel: number
+};
+
+
+export default class HeadingBlock extends React.Component<Props, State> {
+
+    private PREFIXES: {[headingLevel: number]: string} = {
         1: '#',
         2: '##',
         3: '###',
@@ -11,7 +22,7 @@ export default class HeadingBlock extends Component {
         5: '#####'
     };
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
@@ -20,13 +31,13 @@ export default class HeadingBlock extends Component {
         }
     }
 
-    stripPrefix(text, headingLevel) {
+    stripPrefix(text: string, headingLevel: number) {
         let prefixIndex = text.indexOf(this.PREFIXES[headingLevel]);
         let prefixEnd = prefixIndex + this.PREFIXES[headingLevel].length;
         return text.substring(prefixEnd, text.length);
     }
 
-    renderHeading(text, headingLevel) {
+    renderHeading(text: string, headingLevel: number) {
         switch(headingLevel) {
             case 1:
                 return (<h1>{text}</h1>)

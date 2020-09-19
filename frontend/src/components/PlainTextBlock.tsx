@@ -1,9 +1,17 @@
-import React, { Component } from 'react';
+import React from 'react';
+
+interface Props {
+    text: string
+};
+
+interface State {
+    text: string
+};
 
 
-export default class PlainTextBlock extends Component {
+export default class PlainTextBlock extends React.Component<Props, State> {
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props);
         this.state = {
             text: props.text

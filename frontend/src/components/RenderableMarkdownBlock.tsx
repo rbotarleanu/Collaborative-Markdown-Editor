@@ -1,32 +1,43 @@
 import React, { Component } from 'react';
 import '../styles/MarkdownBlock.css';
-import PlainTextBlock from './PlainTextBlock.js';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes.js';
+import PlainTextBlock from './PlainTextBlock';
 import HeadingBlock from './HeadingBlock';
 import UnorderedListBlock from './UnorderedListBlock';
 
 
-export default class RenderableMarkdownBlock extends Component {
+interface State {
+    text: string,
+    onFocusNotify: Function
+}
 
-    constructor(props) {
+interface Props {
+    onFocus: Function,
+    text: string
+}
+
+
+export default class RenderableMarkdownBlock extends Component<Props, State> {
+
+    constructor(props: Props) {
         super(props);
 
-        this.onFocusNotify = props.onFocus;
-
         this.state = {
-            text: props.text
+            text: props.text,
+            onFocusNotify: props.onFocus
         };
 
-        this.handleFocus = this.handleFocus.bind(this);
     }
 
-    handleFocus(e) {
+    handleFocus(e: any) {
         e.preventDefault();
         e.stopPropagation();
-        this.onFocusNotify();
+        this.state.onFocusNotify();
     }
 
-    interpretBlockType(text) {
+    interpretBlockType(text: string): number {
+        text = text.trim();
+
         if (text.startsWith('#####')) {
             return MarkdownBlockTypes.H5;
         }
@@ -52,9 +63,8 @@ export default class RenderableMarkdownBlock extends Component {
         return MarkdownBlockTypes.PLAIN_TEXT;
     }
     
-    interpretAndRender() {
+    interpretAndRender(): JSX.Element {
         let blockType = this.interpretBlockType(this.state.text);
-
         switch (blockType) {
             case MarkdownBlockTypes.H1:
                 return (<HeadingBlock text={this.state.text} headingLevel={1}/>)
@@ -76,7 +86,12 @@ export default class RenderableMarkdownBlock extends Component {
     render() {
         return (
             <div className="RenderableMarkdownBlock"
-                onMouseEnter={(e) => {this.handleFocus(e)}}>
+                onMouseEnter={(e) => {
+                    if (e) {
+                        this.handleFocus(e);
+                    }
+                }}
+            >
                 {this.interpretAndRender()}
             </div>
         )

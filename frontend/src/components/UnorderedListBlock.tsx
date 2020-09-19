@@ -1,8 +1,15 @@
-import React, { Component } from 'react';
-import { getNodeText } from '@testing-library/react';
+import React from 'react';
+
+interface Props {
+    text: string
+};
+
+interface State {
+    text: Array<string>
+}
 
 
-export default class UnorderedListBlock extends Component {
+export default class UnorderedListBlock extends React.Component<Props, State> {
 
     LEVELS = {
         1: '-',
@@ -10,7 +17,7 @@ export default class UnorderedListBlock extends Component {
         3: '*'
     };
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
@@ -18,8 +25,8 @@ export default class UnorderedListBlock extends Component {
         }
     }
 
-    splitIntoLevels(text) {
-        var splitText = [];
+    splitIntoLevels(text: string): Array<string> {
+        var splitText: Array<string> = [];
         text.split(this.LEVELS[1]).forEach((level1) => {
             level1 = level1.trim();
             if (level1.length === 0) {
@@ -49,12 +56,12 @@ export default class UnorderedListBlock extends Component {
         return splitText;
     }
 
-    renderHeading(text) {
+    renderHeading(text: Array<string>): JSX.Element {
         return (
             <ul>
             {
-                text.map((level1ListElement) => {
-                    return (<li>{level1ListElement}</li>)
+                text.map((level1ListElement, idx) => {
+                    return (<li key={idx.toString()}>{level1ListElement}</li>)
                 })
             }
             </ul>

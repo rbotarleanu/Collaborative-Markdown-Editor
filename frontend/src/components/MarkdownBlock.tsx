@@ -1,37 +1,53 @@
-import React, { Component } from 'react';
+import React from 'react';
 import '../styles/MarkdownBlock.css';
 import TextareaAutosize from 'react-textarea-autosize';
-import RenderableMarkdownBlock from './RenderableMarkdownBlock.js';
+import RenderableMarkdownBlock from './RenderableMarkdownBlock';
 
-export default class MarkdownBlock extends Component {
+interface State {
+    text: string,
+    inFocus: boolean,
+    cursorPos: {x: number, y: number}
+}
 
-    constructor(props) {
+interface Props {
+    text: string,
+    id: number,
+    notifyFocus: (id: number) => void
+}
+
+export default class MarkdownBlock extends React.Component<Props, State> {
+
+    private textAreaRef: HTMLElement | null;
+    private notifyInFocus: (id: number) => void;
+    private id: number;
+
+    constructor(props: Props) {
         super(props);
         this.state = {
             text: props.text,
             inFocus: false,
-            cursorPos: {x: 0, y: 0}
+            cursorPos: {x: 0, y: 0},
         };
-        this.id = props.id;
 
         this.textAreaRef = null;
-
         this.notifyInFocus = props.notifyFocus;
-        this.handleChange = this.handleChange.bind(this);
-        this.handleOnFocus = this.handleOnFocus.bind(this);
-        this.handleOffFocus = this.handleOffFocus.bind(this);
+        this.id = props.id;
     }
 
-    handleChange(e) {
+    handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+        if (!e.target) {
+            return;
+        }
+
         this.setState({ text: e.target.value });
     }
 
-    handleOnFocus() {
+    private handleOnFocus() {
         this.notifyInFocus(this.id);
         this.setState({inFocus: true});
     }
 
-    handleOffFocus() {
+    public handleOffFocus() {
         this.setState({inFocus: false});
     }
 
@@ -47,13 +63,17 @@ export default class MarkdownBlock extends Component {
                             e.stopPropagation();
                             this.handleOnFocus();
                         }}
-                        ref={ref => this.textAreaRef=ref}
+                        ref={ref => {
+                            if (ref) {
+                                this.textAreaRef = ref;
+                            }
+                        }}
                     />
                 }
                 {!this.state.inFocus &&
                     <RenderableMarkdownBlock
                         text={this.state.text}
-                        onFocus={this.handleOnFocus}
+                        onFocus={() => this.handleOnFocus()}
                     />
                 }
             </div>
