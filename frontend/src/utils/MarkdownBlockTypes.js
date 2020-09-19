@@ -7,5 +7,6 @@ export const MarkdownBlockTypes = {
     H4: 4,
     H5: 5,
     ORDERED_LIST: 6,
-    UNORDERED_LIST: 7
+    UNORDERED_LIST: 7,
+    HREF: 8
 };

@@ -4,6 +4,7 @@ import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes.js';
 import PlainTextBlock from './PlainTextBlock';
 import HeadingBlock from './HeadingBlock';
 import UnorderedListBlock from './UnorderedListBlock';
+import HrefBlock from './HrefBlock';
 
 
 interface State {
@@ -59,6 +60,9 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         if (text.startsWith('1.')) {
             return MarkdownBlockTypes.ORDERED_LIST;
         }
+        if (text.startsWith('[')) {
+            return MarkdownBlockTypes.HREF;
+        }
 
         return MarkdownBlockTypes.PLAIN_TEXT;
     }
@@ -78,6 +82,8 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
                 return (<HeadingBlock text={this.state.text} headingLevel={5}/>)
             case MarkdownBlockTypes.UNORDERED_LIST:
                 return (<UnorderedListBlock text={this.state.text}/>)
+            case MarkdownBlockTypes.HREF:
+                return (<HrefBlock text={this.state.text}/>)
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }
@@ -86,7 +92,7 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
     render() {
         return (
             <div className="RenderableMarkdownBlock"
-                onMouseEnter={(e) => {
+                onClick={(e) => {
                     if (e) {
                         this.handleFocus(e);
                     }
