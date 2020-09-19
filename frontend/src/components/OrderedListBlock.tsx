@@ -1,5 +1,6 @@
 import React from 'react';
-import '../styles/UnorderedListBlock.css';
+import '../styles/OrderedListBlock.css';
+
 
 interface Props {
     text: string
@@ -10,12 +11,12 @@ interface State {
 }
 
 
-export default class UnorderedListBlock extends React.Component<Props, State> {
+export default class OrderedListBlock extends React.Component<Props, State> {
 
     LEVELS = {
-        1: '-',
-        2: '+',
-        3: '*'
+        1: /\d\.\s*(.*)/,
+        2: /[a-z]\)\s*(.*)/,
+        3: /[i|v|x|l|c|d|m]+\.\s*(.*)/
     };
 
     constructor(props: Props) {
@@ -59,13 +60,13 @@ export default class UnorderedListBlock extends React.Component<Props, State> {
 
     renderHeading(text: Array<string>): JSX.Element {
         return (
-            <ul>
+            <ol>
             {
                 text.map((level1ListElement, idx) => {
                     return (<li key={idx.toString()}>{level1ListElement}</li>)
                 })
             }
-            </ul>
+            </ol>
         )
     }
 

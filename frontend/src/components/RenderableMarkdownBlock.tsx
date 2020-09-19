@@ -5,6 +5,7 @@ import PlainTextBlock from './PlainTextBlock';
 import HeadingBlock from './HeadingBlock';
 import UnorderedListBlock from './UnorderedListBlock';
 import HrefBlock from './HrefBlock';
+import OrderedListBlock from './OrderedListBlock';
 
 
 interface State {
@@ -82,6 +83,8 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
                 return (<HeadingBlock text={this.state.text} headingLevel={5}/>)
             case MarkdownBlockTypes.UNORDERED_LIST:
                 return (<UnorderedListBlock text={this.state.text}/>)
+            case MarkdownBlockTypes.ORDERED_LIST:
+                return (<OrderedListBlock text={this.state.text}/>)
             case MarkdownBlockTypes.HREF:
                 return (<HrefBlock text={this.state.text}/>)
             default:
