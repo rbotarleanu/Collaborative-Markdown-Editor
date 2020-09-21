@@ -7,13 +7,13 @@ interface State {
     text: string,
     inFocus: boolean,
     cursorPos: {x: number, y: number}
-}
+};
 
 interface Props {
     text: string,
     id: number,
     notifyFocus: (id: number) => void
-}
+};
 
 export default class MarkdownBlock extends React.Component<Props, State> {
 

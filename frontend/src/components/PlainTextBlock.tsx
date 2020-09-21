@@ -15,7 +15,7 @@ export default class PlainTextBlock extends React.Component<Props, State> {
         super(props);
         this.state = {
             text: props.text
-        }
+        };
     }
 
     render() {

@@ -28,7 +28,7 @@ export default class HeadingBlock extends React.Component<Props, State> {
         this.state = {
             text: this.stripPrefix(props.text, props.headingLevel),
             headingLevel: props.headingLevel
-        }
+        };
     }
 
     stripPrefix(text: string, headingLevel: number) {

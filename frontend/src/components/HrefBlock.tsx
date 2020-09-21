@@ -21,7 +21,7 @@ export default class HrefBlock extends React.Component<Props, State> {
         this.state = {
             text: parsedText.text,
             url: parsedText.url
-        }
+        };
     }
 
     private sanitizeUrl(url: string): string {

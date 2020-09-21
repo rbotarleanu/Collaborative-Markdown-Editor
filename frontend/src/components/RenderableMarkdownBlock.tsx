@@ -6,17 +6,18 @@ import HeadingBlock from './HeadingBlock';
 import UnorderedListBlock from './UnorderedListBlock';
 import HrefBlock from './HrefBlock';
 import OrderedListBlock from './OrderedListBlock';
+import TableBlock from './TableBlock';
 
 
 interface State {
     text: string,
     onFocusNotify: Function
-}
+};
 
 interface Props {
     onFocus: Function,
     text: string
-}
+};
 
 
 export default class RenderableMarkdownBlock extends Component<Props, State> {
@@ -64,6 +65,9 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         if (text.startsWith('[')) {
             return MarkdownBlockTypes.HREF;
         }
+        if (text.startsWith('|')) {
+            return MarkdownBlockTypes.TABLE;
+        }
 
         return MarkdownBlockTypes.PLAIN_TEXT;
     }
@@ -87,6 +91,8 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
                 return (<OrderedListBlock text={this.state.text}/>)
             case MarkdownBlockTypes.HREF:
                 return (<HrefBlock text={this.state.text}/>)
+            case MarkdownBlockTypes.TABLE:
+                return (<TableBlock text={this.state.text}/>)
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }
