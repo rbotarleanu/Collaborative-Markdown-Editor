@@ -59,25 +59,27 @@ export default class TableBlock extends React.Component<Props, State> {
     renderHeading(table: DataFrame): JSX.Element {
         return (
             <table>
-                {this.state.table.map((row, idx) => {
-                    if (idx == 0) {
+                <tbody>
+                    {this.state.table.map((row, rowIdx) => {
+                        if (rowIdx === 0) {
+                            return (
+                                <tr key={rowIdx}>
+                                    {row.map((name, colIdx) => {
+                                        return <th key={rowIdx + "-" + colIdx}>{name}</th>;
+                                    })}
+                                </tr>
+                            );
+                        }
+
                         return (
-                            <tr>
-                                {row.map((name) => {
-                                    return <th>{name}</th>;
+                            <tr key={rowIdx}>
+                                {row.map((value, colIdx) => {
+                                    return <td key={rowIdx + "-" + colIdx}>{value}</td>;
                                 })}
                             </tr>
                         );
-                    }
-
-                    return (
-                        <tr>
-                            {row.map((value) => {
-                                return <td>{value}</td>;
-                            })}
-                        </tr>
-                    );
-                })}
+                    })}
+                </tbody>
             </table>
         )
     }

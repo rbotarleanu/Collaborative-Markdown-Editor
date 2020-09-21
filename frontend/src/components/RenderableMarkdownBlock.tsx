@@ -7,6 +7,7 @@ import UnorderedListBlock from './UnorderedListBlock';
 import HrefBlock from './HrefBlock';
 import OrderedListBlock from './OrderedListBlock';
 import TableBlock from './TableBlock';
+import ImageBlock from './ImageBlock';
 
 
 interface State {
@@ -68,6 +69,9 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         if (text.startsWith('|')) {
             return MarkdownBlockTypes.TABLE;
         }
+        if (text.startsWith('!')) {
+            return MarkdownBlockTypes.IMAGE;
+        }
 
         return MarkdownBlockTypes.PLAIN_TEXT;
     }
@@ -93,6 +97,8 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
                 return (<HrefBlock text={this.state.text}/>)
             case MarkdownBlockTypes.TABLE:
                 return (<TableBlock text={this.state.text}/>)
+            case MarkdownBlockTypes.IMAGE:
+                return (<ImageBlock text={this.state.text}/>)
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }

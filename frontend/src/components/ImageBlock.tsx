@@ -10,14 +10,13 @@ interface State {
 };
 
 
-export default class HrefBlock extends React.Component<Props, State> {
+export default class ImageBlock extends React.Component<Props, State> {
 
     private urlRegex = /\[(.*)]\((.*)\)/;
 
     constructor(props: Props) {
         super(props);
         let parsedText = this.parseText(props.text);
-
         this.state = {
             text: parsedText.text,
             url: parsedText.url
@@ -40,15 +39,15 @@ export default class HrefBlock extends React.Component<Props, State> {
         }
 
         return {
-            text: match[1],
-            url: this.sanitizeUrl(match[2])
+            text: match[2],
+            url: this.sanitizeUrl(match[1])
         };
     }
 
     render() {
         return (
             <div className="PlainTextBlock">
-                <a href={this.state.url}>{this.state.text}</a>
+                <img src={this.state.url} alt={this.state.text}/>
             </div>
         )
     }
