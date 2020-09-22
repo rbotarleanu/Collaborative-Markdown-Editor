@@ -48,16 +48,19 @@ export default class UnorderedListBlock extends React.Component<Props, State> {
             }
 
             let level2Components = level1.split(this.LEVELS[2]);
-            level2Components = level2Components.map(
-                (text) => text.trim(), level2Components);
+            level2Components = level2Components
+                .map((text) => text.trim())
+                .filter((text) => text.length > 0);
+            
             splitText.push(new ListElement(1, level2Components[0]));
 
             for (var i = 1; i < level2Components.length; i++) {
                 let level2 = level2Components[i];
                 let level3Components = level2.split(this.LEVELS[3]);
-                level3Components = level3Components.map(
-                    (text) => text.trim(), level3Components);
-    
+                level3Components = level3Components
+                    .map((text) => text.trim())
+                    .filter((text) => text.length > 0);
+        
                 splitText.push(new ListElement(2, level3Components[0]));
     
                 for (var j = 1; j < level3Components.length; j++) {
@@ -70,7 +73,7 @@ export default class UnorderedListBlock extends React.Component<Props, State> {
         return splitText;
     }
 
-    renderHeading(text: Array<ListElement>): JSX.Element {
+    renderHeading(text: NestedList): JSX.Element {
         return (
             <ul>
             {

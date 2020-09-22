@@ -1,3 +1,10 @@
 ol {
     margin-block-end: 0em;
+    counter-reset: section;
+    list-style-type: none;
+}
+  
+ol li::before {
+    counter-increment: section;
+    content: counters(section, ".") " ";
 }
