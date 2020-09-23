@@ -25,11 +25,11 @@ export default class PlainTextBlock extends React.Component<Props, State> {
 
     FORMATTING_BLOCKS: FORMATTING_BLOCKS = {
         bold: {
-            match: /\*\*([^\*]*)\*\*/g,
+            match: /\*\*([^*]*)\*\*/g,
             replace: "<b>$1</b>"
         },
         italic: {
-            match: /\*([^\*]*)\*/g,
+            match: /\*([^*]*)\*/g,
             replace: "<i>$1</i>"
         },
     };

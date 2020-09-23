@@ -27,7 +27,7 @@ interface State {
 export default class UnorderedListBlock extends React.Component<Props, State> {
 
     LEVELS = {
-        1: /(^|\n)\-/,
+        1: /(^|\n)-/,
         2: '\n+',
         3: '\n*'
     };
