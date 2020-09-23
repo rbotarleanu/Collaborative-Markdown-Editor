@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/UnorderedListBlock.css';
+import PlainTextBlock from './PlainTextBlock';
 
 
 class ListElement {
@@ -26,9 +27,9 @@ interface State {
 export default class UnorderedListBlock extends React.Component<Props, State> {
 
     LEVELS = {
-        1: '-',
-        2: '+',
-        3: '*'
+        1: /(^|\n)\-/,
+        2: '\n+',
+        3: '\n*'
     };
 
     constructor(props: Props) {
@@ -81,12 +82,19 @@ export default class UnorderedListBlock extends React.Component<Props, State> {
                     let key = idx.toString();
                     switch (component.level) {
                         case 1:
-                            return (<li key={key}>{component.value}</li>);
+                            return (
+                                <li key={key}>
+                                    <PlainTextBlock
+                                        text={component.value}
+                                    />
+                                </li>);
                         case 2:
                             return (
                                 <ul key={"2-" + key}>
                                     <li key={key}>
-                                        {component.value}
+                                        <PlainTextBlock
+                                            text={component.value}
+                                        />
                                     </li>
                                 </ul>
                             );
@@ -95,7 +103,9 @@ export default class UnorderedListBlock extends React.Component<Props, State> {
                                 <ul key={"23-" + key}>
                                     <ul key={"3-" + key}>
                                         <li key={key}>
-                                            {component.value}
+                                            <PlainTextBlock
+                                                text={component.value}
+                                            />
                                         </li>
                                     </ul>
                                 </ul>
