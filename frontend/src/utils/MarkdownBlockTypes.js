@@ -8,8 +8,7 @@ export const MarkdownBlockTypes = {
     H5: 5,
     ORDERED_LIST: 6,
     UNORDERED_LIST: 7,
-    HREF: 8,
-    TABLE: 9,
-    IMAGE: 10,
-    LATEX: 11
+    TABLE: 8,
+    IMAGE: 9,
+    LATEX: 10
 };

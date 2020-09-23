@@ -4,7 +4,6 @@ import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes.js';
 import PlainTextBlock from './PlainTextBlock';
 import HeadingBlock from './HeadingBlock';
 import UnorderedListBlock from './UnorderedListBlock';
-import HrefBlock from './HrefBlock';
 import OrderedListBlock from './OrderedListBlock';
 import TableBlock from './TableBlock';
 import ImageBlock from './ImageBlock';
@@ -64,10 +63,7 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         if (text.startsWith('1.')) {
             return MarkdownBlockTypes.ORDERED_LIST;
         }
-        if (text.startsWith('[')) {
-            return MarkdownBlockTypes.HREF;
-        }
-        if (text.startsWith('|')) {
+    if (text.startsWith('|')) {
             return MarkdownBlockTypes.TABLE;
         }
         if (text.startsWith('!')) {
@@ -97,8 +93,6 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
                 return (<UnorderedListBlock text={this.state.text}/>)
             case MarkdownBlockTypes.ORDERED_LIST:
                 return (<OrderedListBlock text={this.state.text}/>)
-            case MarkdownBlockTypes.HREF:
-                return (<HrefBlock text={this.state.text}/>)
             case MarkdownBlockTypes.TABLE:
                 return (<TableBlock text={this.state.text}/>)
             case MarkdownBlockTypes.IMAGE:

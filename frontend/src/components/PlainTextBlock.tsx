@@ -32,6 +32,10 @@ export default class PlainTextBlock extends React.Component<Props, State> {
             match: /\*([^*]*)\*/g,
             replace: "<i>$1</i>"
         },
+        href: {
+            match: /\[(.*)]\((.*)\)/g,
+            replace: "<a href=\"$2\">$1</a>"
+        }
     };
 
     constructor(props: Props) {

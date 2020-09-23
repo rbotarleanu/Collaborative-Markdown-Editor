@@ -26,7 +26,7 @@ export default class Editor extends React.Component<Props, State> {
                     "##### Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
                     "- Hello\n+*level* 2 \n+level 2 again \n*level 3\n*level 3 **again**\n*level 3 thrice is here\n- how are you doing\n+amazing \n+amazing again\n+amazing thrice\n*level 3 dup\n*level 3 dupdup\n* level3 dupdupdup\n- very well, thank you",
                     "1. First\na)This is Ab)This *is* Bi.1stii.second2. second3. **third**.\n",
-                    "[Click me](www.google.com)",
+                    "This is [a link](https://www.google.com) to Google",
                     "|Col1|Col2|Col3|Col4|\n|V11|V12|V13|V14|\n|V21|v22|v23|v24|",
                     "![https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/1280px-Markdown-mark.svg.png](Markdown logo)",
                     "$\\frac{1}{2}=0.5$",
