@@ -118,7 +118,7 @@ export default class OrderedListBlock extends React.Component<Props, State> {
 
     render() {
         return (
-            <div className="UnorderedListBlock">
+            <div className="OrderedListBlock">
                 {this.renderHeading(this.state.text)}
             </div>
         )

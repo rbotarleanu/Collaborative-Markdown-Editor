@@ -17,7 +17,6 @@ interface Props {
 
 export default class MarkdownBlock extends React.Component<Props, State> {
 
-    private textAreaRef: HTMLElement | null;
     private notifyInFocus: (id: number) => void;
     private id: number;
 
@@ -29,7 +28,6 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             cursorPos: {x: 0, y: 0},
         };
 
-        this.textAreaRef = null;
         this.notifyInFocus = props.notifyFocus;
         this.id = props.id;
     }
@@ -62,11 +60,6 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                             e.preventDefault();
                             e.stopPropagation();
                             this.handleOnFocus();
-                        }}
-                        ref={ref => {
-                            if (ref) {
-                                this.textAreaRef = ref;
-                            }
                         }}
                     />
                 }

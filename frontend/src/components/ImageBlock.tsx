@@ -1,4 +1,6 @@
 import React from 'react';
+import '../styles/ImageBlock.css';
+
 
 interface Props {
     text: string
@@ -46,7 +48,7 @@ export default class ImageBlock extends React.Component<Props, State> {
 
     render() {
         return (
-            <div className="PlainTextBlock">
+            <div className="ImageBlock">
                 <img src={this.state.url} alt={this.state.text}/>
             </div>
         )

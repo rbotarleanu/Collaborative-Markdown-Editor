@@ -1,47 +1,32 @@
 import React, { Component } from 'react';
 import '../styles/MarkdownBlock.css';
+import PlainTextBlock from './PlainTextBlock.js';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes.js';
-import PlainTextBlock from './PlainTextBlock';
 import HeadingBlock from './HeadingBlock';
 import UnorderedListBlock from './UnorderedListBlock';
-import OrderedListBlock from './OrderedListBlock';
-import TableBlock from './TableBlock';
-import ImageBlock from './ImageBlock';
-import LatexBlock from './LatexBlock';
 
 
-interface State {
-    text: string,
-    onFocusNotify: Function
-};
+export default class RenderableMarkdownBlock extends Component {
 
-interface Props {
-    onFocus: Function,
-    text: string
-};
-
-
-export default class RenderableMarkdownBlock extends Component<Props, State> {
-
-    constructor(props: Props) {
+    constructor(props) {
         super(props);
 
+        this.onFocusNotify = props.onFocus;
+
         this.state = {
-            text: props.text,
-            onFocusNotify: props.onFocus
+            text: props.text
         };
 
+        this.handleFocus = this.handleFocus.bind(this);
     }
 
-    handleFocus(e: any) {
+    handleFocus(e) {
         e.preventDefault();
         e.stopPropagation();
-        this.state.onFocusNotify();
+        this.onFocusNotify();
     }
 
-    interpretBlockType(text: string): number {
-        text = text.trim();
-
+    interpretBlockType(text) {
         if (text.startsWith('#####')) {
             return MarkdownBlockTypes.H5;
         }
@@ -63,21 +48,13 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         if (text.startsWith('1.')) {
             return MarkdownBlockTypes.ORDERED_LIST;
         }
-        if (text.startsWith('|')) {
-            return MarkdownBlockTypes.TABLE;
-        }
-        if (text.startsWith('!')) {
-            return MarkdownBlockTypes.IMAGE;
-        }
-        if (text.startsWith('$')) {
-            return MarkdownBlockTypes.LATEX;
-        }
 
         return MarkdownBlockTypes.PLAIN_TEXT;
     }
     
-    interpretAndRender(): JSX.Element {
+    interpretAndRender() {
         let blockType = this.interpretBlockType(this.state.text);
+
         switch (blockType) {
             case MarkdownBlockTypes.H1:
                 return (<HeadingBlock text={this.state.text} headingLevel={1}/>)
@@ -91,14 +68,6 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
                 return (<HeadingBlock text={this.state.text} headingLevel={5}/>)
             case MarkdownBlockTypes.UNORDERED_LIST:
                 return (<UnorderedListBlock text={this.state.text}/>)
-            case MarkdownBlockTypes.ORDERED_LIST:
-                return (<OrderedListBlock text={this.state.text}/>)
-            case MarkdownBlockTypes.TABLE:
-                return (<TableBlock text={this.state.text}/>)
-            case MarkdownBlockTypes.IMAGE:
-                return (<ImageBlock text={this.state.text}/>)
-            case MarkdownBlockTypes.LATEX:
-                return (<LatexBlock text={this.state.text}/>)
             default:
                 return (<PlainTextBlock text={this.state.text}/>)
         }
@@ -107,12 +76,7 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
     render() {
         return (
             <div className="RenderableMarkdownBlock"
-                onClick={(e) => {
-                    if (e) {
-                        this.handleFocus(e);
-                    }
-                }}
-            >
+                onClick={(e) => {this.handleFocus(e)}}>
                 {this.interpretAndRender()}
             </div>
         )
