@@ -107,7 +107,7 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
     render() {
         return (
             <div className="RenderableMarkdownBlock"
-                onClick={(e) => {
+                onMouseEnter={(e) => {
                     if (e) {
                         this.handleFocus(e);
                     }
