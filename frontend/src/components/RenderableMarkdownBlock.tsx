@@ -8,6 +8,7 @@ import OrderedListBlock from './OrderedListBlock';
 import TableBlock from './TableBlock';
 import ImageBlock from './ImageBlock';
 import LatexBlock from './LatexBlock';
+import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 
 
 interface State {
@@ -39,45 +40,8 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         this.state.onFocusNotify();
     }
 
-    interpretBlockType(text: string): number {
-        text = text.trim();
-
-        if (text.startsWith('#####')) {
-            return MarkdownBlockTypes.H5;
-        }
-        if (text.startsWith('####')) {
-            return MarkdownBlockTypes.H4;
-        }
-        if (text.startsWith('###')) {
-            return MarkdownBlockTypes.H3;
-        }
-        if (text.startsWith('##')) {
-            return MarkdownBlockTypes.H2;
-        }
-        if (text.startsWith('#')) {
-            return MarkdownBlockTypes.H1;
-        }
-        if (text.startsWith('-')) {
-            return MarkdownBlockTypes.UNORDERED_LIST;
-        }
-        if (text.startsWith('1.')) {
-            return MarkdownBlockTypes.ORDERED_LIST;
-        }
-        if (text.startsWith('|')) {
-            return MarkdownBlockTypes.TABLE;
-        }
-        if (text.startsWith('!')) {
-            return MarkdownBlockTypes.IMAGE;
-        }
-        if (text.startsWith('$')) {
-            return MarkdownBlockTypes.LATEX;
-        }
-
-        return MarkdownBlockTypes.PLAIN_TEXT;
-    }
-    
     interpretAndRender(): JSX.Element {
-        let blockType = this.interpretBlockType(this.state.text);
+        let blockType = interpretBlockType(this.state.text);
         switch (blockType) {
             case MarkdownBlockTypes.H1:
                 return (<HeadingBlock text={this.state.text} headingLevel={1}/>)

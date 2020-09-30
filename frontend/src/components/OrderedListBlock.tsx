@@ -29,7 +29,7 @@ export default class OrderedListBlock extends React.Component<Props, State> {
     LEVELS = {
         1: /\d\./,
         2: /[a-z]\)/,
-        3: /[i|v]\./
+        3: /[i|v]+\./
     };
 
     constructor(props: Props) {

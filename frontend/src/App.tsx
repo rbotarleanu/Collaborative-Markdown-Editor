@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.css';
-import Editor from './components/Editor';
+import MainPage from './components/MainPage';
+
 
 function App() {
   return (
     <div className="App">
-          <Editor
-          />
+          <MainPage />
     </div>
   );
 }

@@ -2,11 +2,29 @@ import React from 'react';
 import '../styles/Editor.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MarkdownBlock from './MarkdownBlock';
+import { interpretBlockType } from '../utils/MarkdownBlockMatching';
+import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
+import { sampleText } from '../utils/SampleText.js';
+import axios from 'axios';
 
-interface Props {};
+interface Props {
+    text: string
+};
+
 interface State {
     editor: { paragraphs: Array<string> },
-    cursors: { }
+    cursors: { },
+    selectedFile: File | null
+};
+
+class TextBlock {
+    text: string;
+    blockType: number;
+
+    constructor(text: string, blockType: number) {
+        this.text = text;
+        this.blockType = blockType;
+    }
 };
 
 
@@ -18,79 +36,46 @@ export default class Editor extends React.Component<Props, State> {
         super(props);
         this.state = {
             editor: {
-                paragraphs: [
-                    "#Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                    "##Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "### Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    " #### Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "##### Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "- Hello\n+*level* 2 \n+level 2 again \n*level 3\n*level 3 **again**\n*level 3 thrice is here\n- how are you doing\n+amazing \n+amazing again\n+amazing thrice\n*level 3 dup\n*level 3 dupdup\n* level3 dupdupdup\n- very well, thank you",
-                    "1. ~~First~~\na)This is Ab)This *is* Bi.1stii.second2. second3. **third**.\n",
-                    "This _is_ [a link](https://www.google.com) to Google",
-                    "|Col1|Col2|Col3|Col4|\n|V11|V12|V13|V14|\n|V21|v22|v23|v24|",
-                    "![https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/1280px-Markdown-mark.svg.png](Markdown logo)",
-                    "$\\frac{1}{2}=0.5$",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at vehicula massa. Aenean ex mauris, lobortis a sapien vel, consequat tempor urna. Nullam mi est, tincidunt et maximus sed, rhoncus quis nisi. Praesent non aliquet ligula, id porta lorem. Pellentesque eget nulla lectus. Nullam vitae odio nec nisl convallis luctus.",
-                    "Nam quis hendrerit sem, eu vestibulum nibh.",
-                    "Quisque pulvinar neque non sem vestibulum, non ultricies turpis cursus. Praesent ante metus, consectetur in magna sed, vulputate ultrices enim.",
-                    "Sed eget velit ut risus mattis sollicitudin. Cras placerat tortor id consequat vulputate."
-                ]
+                paragraphs: this.splitDocumentIntoBlocks(props.text)
             },
-            cursors: {}
+            cursors: {},
+            selectedFile: null
         };
         
         this.blockRefs = {};
+    }
+
+    private splitDocumentIntoBlocks(doc: string): Array<string> {
+        var newlineBlocks: Array<TextBlock> = [];
+        var mergedBlocks: Array<string> = [];
+        
+        doc.split('\n').forEach((block) => {
+            let blockType = interpretBlockType(block);
+
+            newlineBlocks.push(new TextBlock(block, blockType));
+        });
+
+        // If possible, try to merge consecutive blocks of these types
+        let mergeableBlockTypes: Array<number> = [
+            MarkdownBlockTypes.PLAIN_TEXT,
+            MarkdownBlockTypes.ORDERED_LIST,
+            MarkdownBlockTypes.UNORDERED_LIST,
+            MarkdownBlockTypes.TABLE
+        ];
+        for (var i = 0; i < newlineBlocks.length; ++i) {
+            if (mergeableBlockTypes.indexOf(newlineBlocks[i].blockType) === -1) {
+                mergedBlocks.push(newlineBlocks[i].text);
+                continue;
+            }
+            
+            if (i === 0 || newlineBlocks[i - 1].blockType !== newlineBlocks[i].blockType) {
+                mergedBlocks.push(newlineBlocks[i].text);
+            } else {
+                mergedBlocks[mergedBlocks.length - 1] += '\n' + newlineBlocks[i].text;
+            }
+        }
+
+        return mergedBlocks;
     }
 
     public handleBlockFocus(focusedBlockIdx: number): void {
@@ -104,7 +89,17 @@ export default class Editor extends React.Component<Props, State> {
         })
     }
 
-    render() {
+    private onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        if (!e.target || !e.target.files || e.target.files.length == 0) {
+            return;
+        }
+
+        this.setState({
+            selectedFile: e.target.files[0]
+        });
+    }
+
+   render() {
         return (
             <div className="Editor" id="editor"
                     onClick={(e) => {this.handleBlockFocus(-1)}}>

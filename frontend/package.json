@@ -16,7 +16,7 @@
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
     "react-textarea-autosize": "^8.2.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.0"
   },
   "scripts": {
     "start": "react-scripts start",
