@@ -40,6 +40,12 @@ export default class UnorderedListBlock extends React.Component<Props, State> {
         };
     }
 
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({text: this.splitIntoLevels(this.props.text)});
+        }
+    }
+
     splitIntoLevels(text: string): NestedList {
         var splitText: NestedList = [];
         text.split(this.LEVELS[1]).forEach((level1) => {

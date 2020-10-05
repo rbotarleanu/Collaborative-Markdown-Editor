@@ -24,6 +24,12 @@ export default class LatexBlock extends React.Component<Props, State> {
         };
     }
 
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({text: this.props.text});
+        }
+    }
+
     render() {
         return (
             <Latex>{this.state.text}</Latex>

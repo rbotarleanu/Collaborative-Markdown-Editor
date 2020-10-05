@@ -18,10 +18,20 @@ export default class FirstPage extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
+
+        // PROD
+        // this.state = {
+        //     selectedFile: null,
+        //     initializeEditor: props.initializeEditor
+        // };
+
+        // DEBUG
+        var sampleText = require('../utils/SampleText.js').sampleText;
         this.state = {
-            selectedFile: null,
+            selectedFile: new File([sampleText], "sample_document.md", {type: "text/markdown"}),
             initializeEditor: props.initializeEditor
         };
+        requestAnimationFrame(() => {this.handleStartButton()});
     }
 
     private onFileChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -43,10 +53,10 @@ export default class FirstPage extends React.Component<Props, State> {
                 }
                 this.state.initializeEditor(e.target.result); 
             };
-            
+
             reader.readAsText(this.state.selectedFile);
         } else {
-            this.state.initializeEditor("Click to edit...");
+            this.state.initializeEditor("");
         }
     }
 

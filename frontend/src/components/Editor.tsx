@@ -6,14 +6,15 @@ import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
 import { sampleText } from '../utils/SampleText.js';
 import axios from 'axios';
+import { request } from 'http';
 
 interface Props {
     text: string
 };
 
 interface State {
-    editor: { paragraphs: Array<string> },
-    cursors: { },
+    paragraphs: Array<string>,
+    cursors: { [user: string]: { block: number, position: number } },
     selectedFile: File | null
 };
 
@@ -31,17 +32,19 @@ class TextBlock {
 export default class Editor extends React.Component<Props, State> {
 
     private blockRefs: { [ref: number]: MarkdownBlock };
+    private DUMMY_BLOCK = "Click here to edit...";
 
     constructor(props: Props) {
         super(props);
+        var documentBlocks = this.splitDocumentIntoBlocks(props.text);
+        documentBlocks.push(this.DUMMY_BLOCK);
+
         this.state = {
-            editor: {
-                paragraphs: this.splitDocumentIntoBlocks(props.text)
-            },
-            cursors: {},
+            paragraphs: documentBlocks,
+            cursors: { self: {block: -1, position: -1} },
             selectedFile: null
         };
-        
+
         this.blockRefs = {};
     }
 
@@ -50,8 +53,11 @@ export default class Editor extends React.Component<Props, State> {
         var mergedBlocks: Array<string> = [];
         
         doc.split('\n').forEach((block) => {
-            let blockType = interpretBlockType(block);
+            if (block.trim().length === 0) {
+                return;
+            }
 
+            let blockType = interpretBlockType(block);
             newlineBlocks.push(new TextBlock(block, blockType));
         });
 
@@ -78,15 +84,53 @@ export default class Editor extends React.Component<Props, State> {
         return mergedBlocks;
     }
 
+    private cleanUpParagraphs(paragraphs: Array<string>, focusedBlockIdx: number): Array<string> {
+        // Remove empty blocks
+        paragraphs = paragraphs.filter(
+            (block) => block.trim().length !== 0);
+
+        // A single dummy block is always shown at the end of the document
+        if (focusedBlockIdx === paragraphs.length - 1 && 
+            paragraphs[paragraphs.length - 2] !== this.DUMMY_BLOCK) {
+            paragraphs.push(this.DUMMY_BLOCK);
+        }
+
+        return paragraphs;
+    }
+
     public handleBlockFocus(focusedBlockIdx: number): void {
         Object.keys(this.blockRefs).forEach((idx: string) => {
             let idxToNum = parseInt(idx);
             if (idxToNum === focusedBlockIdx) {
                 return;
             }
-            
-            this.blockRefs[idxToNum].handleOffFocus();
-        })
+
+            if (this.blockRefs && this.blockRefs[idxToNum]) {
+                this.blockRefs[idxToNum].handleOffFocus();
+            }
+        });
+
+        var newState = {...this.state};
+        newState.paragraphs = this.cleanUpParagraphs(newState.paragraphs, focusedBlockIdx);
+
+        newState.cursors.self = {
+            block: focusedBlockIdx,
+            position: -1
+        };
+    
+        this.setState(newState);
+    }
+
+    public updateBlockInformation(blockId: number, text: string, cursorPosition: number): void {
+        var newState = this.state;
+
+        newState.paragraphs[blockId] = text;
+        newState.cursors.self = {
+            block: blockId,
+            position: cursorPosition
+        };
+
+        this.setState(newState);
     }
 
     private onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -105,13 +149,17 @@ export default class Editor extends React.Component<Props, State> {
                     onClick={(e) => {this.handleBlockFocus(-1)}}>
                 <div className="TextBlocks">
                     {
-                        this.state.editor.paragraphs.map((paragraph, idx) => {
+                        this.state.paragraphs.map((paragraph, idx) => {
                             return (
                                 <MarkdownBlock
                                     text={paragraph}
                                     id={idx}
                                     key={idx}
                                     notifyFocus={(id: number) => this.handleBlockFocus(id)}
+                                    updateBlockInfo={
+                                        (blockId: number, text: string, cursorPosition: number) =>
+                                        this.updateBlockInformation(blockId, text, cursorPosition)
+                                    }
                                     ref={(ref) => {
                                         if (ref) {
                                             this.blockRefs[idx]=ref

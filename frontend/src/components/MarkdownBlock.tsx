@@ -13,11 +13,13 @@ interface Props {
     text: string,
     id: number,
     notifyFocus: (id: number) => void
+    updateBlockInfo: (blockId: number, text: string, cursorPosition: number) => void
 };
 
 export default class MarkdownBlock extends React.Component<Props, State> {
 
     private notifyInFocus: (id: number) => void;
+    private updateBlockInfo: (blockId: number, text: string, cursorPosition: number) => void;
     private id: number;
 
     constructor(props: Props) {
@@ -25,11 +27,18 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.state = {
             text: props.text,
             inFocus: false,
-            cursorPos: {x: 0, y: 0},
+            cursorPos: {x: 0, y: 0}
         };
 
         this.notifyInFocus = props.notifyFocus;
+        this.updateBlockInfo = props.updateBlockInfo;
         this.id = props.id;
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({ text: this.props.text });
+        }
     }
 
     handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -37,6 +46,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             return;
         }
 
+        this.updateBlockInfo(this.id, e.target.value, e.target.selectionStart);
         this.setState({ text: e.target.value });
     }
 
@@ -59,7 +69,10 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            this.handleOnFocus();
+
+                            if (!this.state.inFocus) {
+                                this.handleOnFocus();
+                            }
                         }}
                     />
                 }

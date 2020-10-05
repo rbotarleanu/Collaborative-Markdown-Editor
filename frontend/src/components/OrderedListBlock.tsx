@@ -40,6 +40,14 @@ export default class OrderedListBlock extends React.Component<Props, State> {
         };
     }
 
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({text: this.splitIntoLevels(this.props.text)});
+        }
+    }
+
+
     splitIntoLevels(text: string): NestedList {
         var splitText: NestedList = [];
         text.split(this.LEVELS[1]).map((s) => s.trim()).forEach((level1) => {

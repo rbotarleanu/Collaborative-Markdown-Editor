@@ -18,11 +18,21 @@ export default class ImageBlock extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
+        this.state = this.makeState(props);
+    }
+
+    makeState(props: Props): State {
         let parsedText = this.parseText(props.text);
-        this.state = {
+        return {
             text: parsedText.text,
             url: parsedText.url
         };
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState(this.makeState(this.props));
+        }
     }
 
     private sanitizeUrl(url: string): string {

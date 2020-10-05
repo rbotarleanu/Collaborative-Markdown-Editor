@@ -22,15 +22,25 @@ export default class HeadingBlock extends React.Component<Props, State> {
         5: '#####'
     };
 
+    
     constructor(props: Props) {
         super(props);
 
-        this.state = {
+        this.state = this.makeState(props);
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState(this.makeState(this.props));
+        }
+    }
+
+    makeState(props: Props): State {
+        return {
             text: this.stripPrefix(props.text, props.headingLevel),
             headingLevel: props.headingLevel
         };
     }
-
     stripPrefix(text: string, headingLevel: number) {
         let prefixIndex = text.indexOf(this.PREFIXES[headingLevel]);
         let prefixEnd = prefixIndex + this.PREFIXES[headingLevel].length;

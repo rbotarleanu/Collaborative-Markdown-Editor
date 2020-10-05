@@ -40,6 +40,12 @@ export default class RenderableMarkdownBlock extends Component<Props, State> {
         this.state.onFocusNotify();
     }
 
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({ text: this.props.text });
+        }
+    }
+
     interpretAndRender(): JSX.Element {
         let blockType = interpretBlockType(this.state.text);
         switch (blockType) {

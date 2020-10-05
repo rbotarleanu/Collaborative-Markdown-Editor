@@ -26,6 +26,12 @@ export default class TableBlock extends React.Component<Props, State> {
         };
     }
 
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({table: this.toDataFrame(this.props.text)});
+        }
+    }
+
     toDataFrame(text: string): DataFrame {
         var df: DataFrame = [];
 

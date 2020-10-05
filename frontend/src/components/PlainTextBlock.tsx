@@ -46,19 +46,29 @@ export default class PlainTextBlock extends React.Component<Props, State> {
         }
     };
 
-    constructor(props: Props) {
-        super(props);
-        var text: string = props.text;
-
+    formatText(text: string): string {
         for (var format in this.FORMATTING_BLOCKS) {
             let regex = this.FORMATTING_BLOCKS[format].match;
             let replace = this.FORMATTING_BLOCKS[format].replace;
             text = text.replace(regex, replace);
         }
 
+        return text;
+    }
+
+    constructor(props: Props) {
+        super(props);
+        
+
         this.state = {
-            text: text
+            text: this.formatText(props.text)
         };
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.text !== this.props.text) {
+            this.setState({text: this.formatText(this.props.text)});
+        }
     }
 
     render() {
