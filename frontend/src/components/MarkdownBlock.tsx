@@ -27,6 +27,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
     private updateBlockInfo: updateBlockInfoFn;
     private id: number;
     private textAreaRef: HTMLTextAreaElement | null;
+    private _isMounted: boolean = false;
 
     constructor(props: Props) {
         super(props);
@@ -46,6 +47,14 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         if (prevProps.text !== this.props.text) {
             this.setState({ text: this.props.text });
         }
+    }
+
+    componentDidMount() {
+        this._isMounted = true;
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
     }
 
     handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -77,7 +86,9 @@ export default class MarkdownBlock extends React.Component<Props, State> {
     }
 
     public handleOffFocus() {
-        this.setState({ inFocus: false });
+        if (this._isMounted) {
+            this.setState({ inFocus: false });
+        }
     }
 
     render() {
