@@ -103,6 +103,10 @@ export default class Editor extends React.Component<Props, State> {
         return paragraphs;
     }
 
+    public handleSwitchToNextFocusBlock(currentBlockIdx: number): void {
+        this.blockRefs[currentBlockIdx + 1].handleOnFocus();
+    }
+
     public handleBlockFocus(focusedBlockIdx: number): void {
         Object.keys(this.blockRefs).forEach((idx: string) => {
             let idxToNum = parseInt(idx);
@@ -164,6 +168,7 @@ export default class Editor extends React.Component<Props, State> {
                                     id={idx}
                                     key={idx}
                                     notifyFocus={(id: number) => this.handleBlockFocus(id)}
+                                    switchFocusToNextBlock={(id: number) => this.handleSwitchToNextFocusBlock(id)}
                                     updateBlockInfo={
                                         (blockId: number, text: string, selectionStart: number, selectionEnd: number) =>
                                         this.updateBlockInformation(blockId, text, selectionStart, selectionEnd)

@@ -11,34 +11,42 @@ type updateBlockInfoFn = (
 interface State {
     text: string,
     inFocus: boolean,
-    cursorPos: {x: number, y: number}
+    cursorPos: {x: number, y: number},
+    lastKeyPressed: string,
+    lastKeyPressTime: number
 };
 
 interface Props {
     text: string,
     id: number,
     notifyFocus: (id: number) => void
-    updateBlockInfo: updateBlockInfoFn
+    updateBlockInfo: updateBlockInfoFn,
+    switchFocusToNextBlock: (id: number) => void
 };
 
 export default class MarkdownBlock extends React.Component<Props, State> {
 
     private notifyInFocus: (id: number) => void;
+    private switchFocusToNextBlock: (id: number) => void;
     private updateBlockInfo: updateBlockInfoFn;
     private id: number;
     private textAreaRef: HTMLTextAreaElement | null;
     private _isMounted: boolean = false;
+    private HOTKEY_DELTA = 500;
 
     constructor(props: Props) {
         super(props);
         this.state = {
             text: props.text,
             inFocus: false,
-            cursorPos: {x: 0, y: 0}
+            cursorPos: {x: 0, y: 0},
+            lastKeyPressTime: 0,
+            lastKeyPressed: ""
         };
 
         this.notifyInFocus = props.notifyFocus;
         this.updateBlockInfo = props.updateBlockInfo;
+        this.switchFocusToNextBlock = props.switchFocusToNextBlock;
         this.id = props.id;
         this.textAreaRef = null;
     }
@@ -67,7 +75,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.setState({ text: e.target.value });
     }
 
-    private handleOnFocus() {
+    public handleOnFocus() {
         this.notifyInFocus(this.id);
         this.setState({ inFocus: true });
         requestAnimationFrame(() => {
@@ -91,6 +99,33 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         }
     }
 
+    private handleEditorKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+        let newState = {...this.state};
+        newState.lastKeyPressTime = e.timeStamp;
+        newState.lastKeyPressed = e.key;
+
+        switch(e.key) {
+            case "Escape":
+                newState.inFocus = false;
+                break;
+            case "Shift":
+                // Since we are monitoring key up events events in shift+enter
+                // the enter key up event happens first
+                if (this.state.lastKeyPressed === 'Enter' &&
+                    e.timeStamp - this.state.lastKeyPressTime < this.HOTKEY_DELTA) {
+                    newState.inFocus = false;
+                    requestAnimationFrame(() => {
+                        this.switchFocusToNextBlock(this.id);
+                    });
+                }
+                break;
+            default:
+                break;
+        }
+
+        this.setState(newState);
+    }
+
     render() {
         return (
             <div className="MarkdownBlock">
@@ -107,6 +142,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                                 this.handleOnFocus();
                             }
                         }}
+                        onKeyUp={(e) => {this.handleEditorKeyPress(e);}}
                         ref={(ref) => this.textAreaRef=ref}
                     />
                 }
