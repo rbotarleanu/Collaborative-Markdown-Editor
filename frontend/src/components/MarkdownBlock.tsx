@@ -3,6 +3,11 @@ import '../styles/MarkdownBlock.css';
 import TextareaAutosize from 'react-textarea-autosize';
 import RenderableMarkdownBlock from './RenderableMarkdownBlock';
 
+
+type updateBlockInfoFn = (
+    blockId: number, text: string,
+    selectionStart: number, selectionEnd: number) => void;
+
 interface State {
     text: string,
     inFocus: boolean,
@@ -13,13 +18,13 @@ interface Props {
     text: string,
     id: number,
     notifyFocus: (id: number) => void
-    updateBlockInfo: (blockId: number, text: string, cursorPosition: number) => void
+    updateBlockInfo: updateBlockInfoFn
 };
 
 export default class MarkdownBlock extends React.Component<Props, State> {
 
     private notifyInFocus: (id: number) => void;
-    private updateBlockInfo: (blockId: number, text: string, cursorPosition: number) => void;
+    private updateBlockInfo: updateBlockInfoFn;
     private id: number;
     private textAreaRef: HTMLTextAreaElement | null;
 
@@ -48,7 +53,8 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             return;
         }
 
-        this.updateBlockInfo(this.id, e.target.value, e.target.selectionStart);
+        // We don't need to update the block info here since a selection event
+        // is also triggered.
         this.setState({ text: e.target.value });
     }
 
@@ -63,6 +69,13 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         });
     }
 
+    private handleSelect(e: React.SyntheticEvent<HTMLTextAreaElement, Event>) {
+        let target = e.target as HTMLTextAreaElement;
+        this.updateBlockInfo(
+            this.id, this.state.text,
+            target.selectionStart, target.selectionEnd);
+    }
+
     public handleOffFocus() {
         this.setState({ inFocus: false });
     }
@@ -74,6 +87,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                     <TextareaAutosize
                         value={this.state.text}
                         onChange={(e) => {this.handleChange(e);}}
+                        onSelect={(e) => {this.handleSelect(e);}}
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();

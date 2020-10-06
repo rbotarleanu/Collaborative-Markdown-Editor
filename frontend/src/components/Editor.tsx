@@ -4,9 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import MarkdownBlock from './MarkdownBlock';
 import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
-import { sampleText } from '../utils/SampleText.js';
-import axios from 'axios';
-import { request } from 'http';
 
 interface Props {
     text: string
@@ -14,7 +11,15 @@ interface Props {
 
 interface State {
     paragraphs: Array<string>,
-    cursors: { [user: string]: { block: number, position: number } },
+    cursors: {
+        [user: string]: {
+            block: number,
+            selection: {
+                start: number,
+                end: number
+            }
+        }
+    },
     selectedFile: File | null
 };
 
@@ -41,7 +46,7 @@ export default class Editor extends React.Component<Props, State> {
 
         this.state = {
             paragraphs: documentBlocks,
-            cursors: { self: {block: -1, position: -1} },
+            cursors: { self: {block: -1, selection: {start: -1, end: -1 } } },
             selectedFile: null
         };
 
@@ -115,26 +120,29 @@ export default class Editor extends React.Component<Props, State> {
 
         newState.cursors.self = {
             block: focusedBlockIdx,
-            position: -1
+            selection: {start: -1, end: -1}
         };
     
         this.setState(newState);
     }
 
-    public updateBlockInformation(blockId: number, text: string, cursorPosition: number): void {
+    public updateBlockInformation(blockId: number, text: string,
+                                  selectionStart: number,
+                                  selectionEnd: number): void {
         var newState = this.state;
-
         newState.paragraphs[blockId] = text;
         newState.cursors.self = {
             block: blockId,
-            position: cursorPosition
+            selection: {
+                start: selectionStart,
+                end: selectionEnd
+            }
         };
-
         this.setState(newState);
     }
 
     private onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-        if (!e.target || !e.target.files || e.target.files.length == 0) {
+        if (!e.target || !e.target.files || e.target.files.length === 0) {
             return;
         }
 
@@ -157,8 +165,8 @@ export default class Editor extends React.Component<Props, State> {
                                     key={idx}
                                     notifyFocus={(id: number) => this.handleBlockFocus(id)}
                                     updateBlockInfo={
-                                        (blockId: number, text: string, cursorPosition: number) =>
-                                        this.updateBlockInformation(blockId, text, cursorPosition)
+                                        (blockId: number, text: string, selectionStart: number, selectionEnd: number) =>
+                                        this.updateBlockInformation(blockId, text, selectionStart, selectionEnd)
                                     }
                                     ref={(ref) => {
                                         if (ref) {

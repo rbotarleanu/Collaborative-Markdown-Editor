@@ -1,5 +1,4 @@
 import React from 'react';
-import { First } from 'react-bootstrap/lib/Pagination';
 import Editor from './Editor';
 import FirstPage from './FirstPage';
 import '../styles/MainPage.css';
