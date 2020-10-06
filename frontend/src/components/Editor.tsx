@@ -103,8 +103,13 @@ export default class Editor extends React.Component<Props, State> {
         return paragraphs;
     }
 
-    public handleSwitchToNextFocusBlock(currentBlockIdx: number): void {
-        this.blockRefs[currentBlockIdx + 1].handleOnFocus();
+    public handleSwitchToNextFocusBlock(currentBlockIdx: number, reverse: boolean = false): void {
+        let nextBlock = currentBlockIdx + (reverse ? -1 : 1);
+        let cursorPos = reverse ? -1 : 0;
+
+        if (this.blockRefs[nextBlock]) {
+            this.blockRefs[nextBlock].handleOnFocus(cursorPos);
+        }
     }
 
     public handleBlockFocus(focusedBlockIdx: number): void {
@@ -168,7 +173,8 @@ export default class Editor extends React.Component<Props, State> {
                                     id={idx}
                                     key={idx}
                                     notifyFocus={(id: number) => this.handleBlockFocus(id)}
-                                    switchFocusToNextBlock={(id: number) => this.handleSwitchToNextFocusBlock(id)}
+                                    switchFocusToNextBlock={(id: number, reverse: boolean = false) =>
+                                        this.handleSwitchToNextFocusBlock(id, reverse)}
                                     updateBlockInfo={
                                         (blockId: number, text: string, selectionStart: number, selectionEnd: number) =>
                                         this.updateBlockInformation(blockId, text, selectionStart, selectionEnd)

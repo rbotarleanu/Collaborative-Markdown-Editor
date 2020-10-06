@@ -21,18 +21,18 @@ interface Props {
     id: number,
     notifyFocus: (id: number) => void
     updateBlockInfo: updateBlockInfoFn,
-    switchFocusToNextBlock: (id: number) => void
+    switchFocusToNextBlock: (id: number, reverse?: boolean) => void
 };
 
 export default class MarkdownBlock extends React.Component<Props, State> {
 
     private notifyInFocus: (id: number) => void;
-    private switchFocusToNextBlock: (id: number) => void;
+    private switchFocusToNextBlock: (id: number, reverse?: boolean) => void;
     private updateBlockInfo: updateBlockInfoFn;
     private id: number;
     private textAreaRef: HTMLTextAreaElement | null;
     private _isMounted: boolean = false;
-    private HOTKEY_DELTA = 500;
+    private HOTKEY_DELTA = 2000;
 
     constructor(props: Props) {
         super(props);
@@ -75,13 +75,15 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.setState({ text: e.target.value });
     }
 
-    public handleOnFocus() {
+    public handleOnFocus(cursorPosition: number = 0) {
         this.notifyInFocus(this.id);
         this.setState({ inFocus: true });
+        cursorPosition = cursorPosition >= 0 ? cursorPosition : this.state.text.length;
+
         requestAnimationFrame(() => {
             if (this.textAreaRef) {
                 this.textAreaRef.focus();
-                this.textAreaRef.setSelectionRange(0, 0);
+                this.textAreaRef.setSelectionRange(cursorPosition, cursorPosition);
             }
         });
     }
@@ -108,15 +110,25 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             case "Escape":
                 newState.inFocus = false;
                 break;
-            case "Shift":
+            case "Enter":
                 // Since we are monitoring key up events events in shift+enter
                 // the enter key up event happens first
-                if (this.state.lastKeyPressed === 'Enter' &&
+                if (this.state.lastKeyPressed === 'Shift' &&
                     e.timeStamp - this.state.lastKeyPressTime < this.HOTKEY_DELTA) {
                     newState.inFocus = false;
-                    requestAnimationFrame(() => {
-                        this.switchFocusToNextBlock(this.id);
-                    });
+                    this.switchFocusToNextBlock(this.id);
+                }
+                break;
+            case 'ArrowRight':
+                if (this.textAreaRef?.selectionEnd === this.state.text.length) {
+                    newState.inFocus = false;
+                    this.switchFocusToNextBlock(this.id);
+                }
+                break;
+            case 'ArrowLeft':
+                if (this.textAreaRef?.selectionStart === 0) {
+                    newState.inFocus = false;
+                    this.switchFocusToNextBlock(this.id, true);
                 }
                 break;
             default:
@@ -142,7 +154,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                                 this.handleOnFocus();
                             }
                         }}
-                        onKeyUp={(e) => {this.handleEditorKeyPress(e);}}
+                        onKeyDown={(e) => {this.handleEditorKeyPress(e);}}
                         ref={(ref) => this.textAreaRef=ref}
                     />
                 }
