@@ -21,6 +21,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
     private notifyInFocus: (id: number) => void;
     private updateBlockInfo: (blockId: number, text: string, cursorPosition: number) => void;
     private id: number;
+    private textAreaRef: HTMLTextAreaElement | null;
 
     constructor(props: Props) {
         super(props);
@@ -33,6 +34,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.notifyInFocus = props.notifyFocus;
         this.updateBlockInfo = props.updateBlockInfo;
         this.id = props.id;
+        this.textAreaRef = null;
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -52,11 +54,17 @@ export default class MarkdownBlock extends React.Component<Props, State> {
 
     private handleOnFocus() {
         this.notifyInFocus(this.id);
-        this.setState({inFocus: true});
+        this.setState({ inFocus: true });
+        requestAnimationFrame(() => {
+            if (this.textAreaRef) {
+                this.textAreaRef.focus();
+                this.textAreaRef.setSelectionRange(0, 0);
+            }
+        });
     }
 
     public handleOffFocus() {
-        this.setState({inFocus: false});
+        this.setState({ inFocus: false });
     }
 
     render() {
@@ -74,6 +82,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                                 this.handleOnFocus();
                             }
                         }}
+                        ref={(ref) => this.textAreaRef=ref}
                     />
                 }
                 {!this.state.inFocus &&
