@@ -3,6 +3,7 @@ import '../styles/Editor.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/FirstPage.css';
 import Button from 'react-bootstrap/Button';
+import TextareaAutosize from 'react-textarea-autosize';
 
 
 interface Props {
@@ -10,7 +11,8 @@ interface Props {
 };
 interface State {
     selectedFile: File | null,
-    initializeEditor: (text: string) => void
+    initializeEditor: (text: string) => void,
+    text: string
 };
 
 
@@ -20,18 +22,19 @@ export default class FirstPage extends React.Component<Props, State> {
         super(props);
 
         // PROD
-        // this.state = {
-        //     selectedFile: null,
-        //     initializeEditor: props.initializeEditor
-        // };
+        this.state = {
+            selectedFile: null,
+            initializeEditor: props.initializeEditor,
+            text: ""
+        };
 
         // DEBUG
-        var sampleText = require('../utils/SampleText.js').sampleText;
-        this.state = {
-            selectedFile: new File([sampleText], "sample_document.md", {type: "text/markdown"}),
-            initializeEditor: props.initializeEditor
-        };
-        requestAnimationFrame(() => {this.handleStartButton()});
+        // var sampleText = require('../utils/SampleText.js').sampleText;
+        // this.state = {
+        //     selectedFile: new File([sampleText], "sample_document.md", {type: "text/markdown"}),
+        //     initializeEditor: props.initializeEditor
+        // };
+        // requestAnimationFrame(() => {this.handleStartButton()});
     }
 
     private onFileChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -56,16 +59,20 @@ export default class FirstPage extends React.Component<Props, State> {
 
             reader.readAsText(this.state.selectedFile);
         } else {
-            this.state.initializeEditor("");
+            this.state.initializeEditor(this.state.text);
         }
     }
 
     render() {
         return (
             <div className="FirstPage" id="frontPage">
-                <span>(Optional) Select a markdown file:</span>
+                <span>Select a markdown file: </span>
                 <input type="file" onChange={(e) => {this.onFileChange(e)}}/>
-                <Button variant="outline-primary"
+                <p>Or paste a Markdown document:</p>
+                <textarea 
+                    onChange={(e) => {this.setState({text: e.target.value})}}    
+                />
+                <Button variant="outline-info"
                     onClick={() => {this.handleStartButton()}}>Go!</Button>
             </div>
         )

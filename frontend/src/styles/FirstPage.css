@@ -1,12 +1,10 @@
 
 .FirstPage {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100%;
+    padding: 1% 1% 1% 1%;
 }
 
-.FirstPage > span {
+.FirstPage > span, p {
     color: white;
     font-size: x-large;
 }
@@ -14,4 +12,15 @@
 input {
     font-size: 20px;
     color: white;
+    padding-bottom: 1%;
+}
+
+textarea {
+    width: 100%;
+    height: 80%;
+}
+
+.FirstPage > .btn {
+    font-size: 24px;
+    float: right;
 }
