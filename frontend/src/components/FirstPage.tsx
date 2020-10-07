@@ -3,7 +3,6 @@ import '../styles/Editor.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/FirstPage.css';
 import Button from 'react-bootstrap/Button';
-import TextareaAutosize from 'react-textarea-autosize';
 
 
 interface Props {
@@ -22,19 +21,20 @@ export default class FirstPage extends React.Component<Props, State> {
         super(props);
 
         // PROD
+        // this.state = {
+        //     selectedFile: null,
+        //     initializeEditor: props.initializeEditor,
+        //     text: ""
+        // };
+
+        // DEBUG
+        var sampleText = require('../utils/SampleText.js').sampleText;
         this.state = {
-            selectedFile: null,
+            selectedFile: new File([sampleText], "sample_document.md", {type: "text/markdown"}),
             initializeEditor: props.initializeEditor,
             text: ""
         };
-
-        // DEBUG
-        // var sampleText = require('../utils/SampleText.js').sampleText;
-        // this.state = {
-        //     selectedFile: new File([sampleText], "sample_document.md", {type: "text/markdown"}),
-        //     initializeEditor: props.initializeEditor
-        // };
-        // requestAnimationFrame(() => {this.handleStartButton()});
+        requestAnimationFrame(() => {this.handleStartButton()});
     }
 
     private onFileChange(e: React.ChangeEvent<HTMLInputElement>): void {

@@ -11,3 +11,17 @@
     overflow-y: scroll;
     padding-bottom: 1%;
 }
+
+.Toolbar {
+    margin-left: 10%;
+    margin-right: 10%;
+    height: 4em;
+    color: white;
+    border-style: hidden hidden solid hidden;
+}
+
+.Toolbar > .btn {
+    font-size: 20px;
+    margin-top: 7px;
+    margin-bottom: 1%;
+}

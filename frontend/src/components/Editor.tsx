@@ -4,7 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import MarkdownBlock from './MarkdownBlock';
 import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
-import { request } from 'https';
+import Button from 'react-bootstrap/Button';
+import FileSaver from 'file-saver';
+
 
 interface Props {
     text: string
@@ -179,10 +181,25 @@ export default class Editor extends React.Component<Props, State> {
         });
     }
 
+    private handleExport() {
+        let text = this.state.paragraphs
+            .slice(0, this.state.paragraphs.length - 1)
+            .join("\n");
+        let data = new Blob([text], {type: "text/markdown"});
+        FileSaver.saveAs(data, "README.md");
+    }
+
    render() {
         return (
             <div className="Editor" id="editor"
                     onClick={(e) => { this.handleBlockFocus(-1); }}>
+                <div className="Toolbar">
+                    <Button
+                        variant="secondary"
+                        onClick={() => {this.handleExport()}}>
+                            Export
+                    </Button>
+                </div>
                 <div className="TextBlocks">
                     {
                         this.state.paragraphs.map((paragraph, idx) => {
