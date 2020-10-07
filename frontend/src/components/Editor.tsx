@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import MarkdownBlock from './MarkdownBlock';
 import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
+import { request } from 'https';
 
 interface Props {
     text: string
@@ -116,12 +117,18 @@ export default class Editor extends React.Component<Props, State> {
     }
 
     public handleSwitchToNextFocusBlock(currentBlockIdx: number, reverse: boolean = false): void {
+        var newState = {...this.state};
+        newState.paragraphs = this.cleanUpParagraphs(newState.paragraphs,
+                                                     currentBlockIdx);
         let nextBlock = currentBlockIdx + (reverse ? -1 : 1);
         let cursorPos = reverse ? -1 : 0;
 
-        if (this.blockRefs[nextBlock]) {
-            this.blockRefs[nextBlock].handleOnFocus(cursorPos);
-        }
+        this.setState(newState);
+        requestAnimationFrame(() => {
+            if (this.blockRefs[nextBlock]) {
+                this.blockRefs[nextBlock].handleOnFocus(cursorPos);
+            }
+        });
     }
 
     public handleBlockFocus(focusedBlockIdx: number): void {
