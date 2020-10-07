@@ -94,11 +94,23 @@ export default class Editor extends React.Component<Props, State> {
         paragraphs = paragraphs.filter(
             (block) => block.trim().length !== 0);
 
-        // A single dummy block is always shown at the end of the document
-        if (focusedBlockIdx === paragraphs.length - 1 && 
-            paragraphs[paragraphs.length - 2] !== this.DUMMY_BLOCK) {
-            paragraphs.push(this.DUMMY_BLOCK);
+        // If there is more than 1 dummy block near the end, we remove redundant ones
+        var numDummyBlocks = 0;
+        for (var i = paragraphs.length - 1; i >= 0; --i) {
+            if (paragraphs[i] !== this.DUMMY_BLOCK) {
+                break;
+            }
+
+            numDummyBlocks += 1;
         }
+        if (numDummyBlocks > 0) {
+            paragraphs.splice(
+                paragraphs.length - numDummyBlocks,
+                numDummyBlocks);
+        }
+
+        // A single dummy block is always shown at the end of the document
+        paragraphs.push(this.DUMMY_BLOCK);
 
         return paragraphs;
     }
@@ -163,7 +175,7 @@ export default class Editor extends React.Component<Props, State> {
    render() {
         return (
             <div className="Editor" id="editor"
-                    onClick={(e) => {this.handleBlockFocus(-1)}}>
+                    onClick={(e) => { this.handleBlockFocus(-1); }}>
                 <div className="TextBlocks">
                     {
                         this.state.paragraphs.map((paragraph, idx) => {

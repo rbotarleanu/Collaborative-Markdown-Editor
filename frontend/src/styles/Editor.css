@@ -6,7 +6,9 @@
 
 .Editor {
     align-items: center;
+    position: relative;
     margin-top: 1%;
     margin-bottom: 1%;
     height: 100%;
+    overflow-y: scroll;
 }

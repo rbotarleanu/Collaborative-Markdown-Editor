@@ -4,7 +4,7 @@ body, html {
 
 .App {
   height: fit-content;
-  background-color: rgba(27, 42, 92, 255);
+  background-color: rgb(40, 42, 54);
   position: absolute;
   width: 100%;
   height: 100vh;
@@ -30,7 +30,7 @@ body, html {
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #f8f8f2;
 }
 
 .App-link {
