@@ -1,0 +1,21 @@
+
+.CollaborateMenu {
+    position: absolute;
+    margin: 0 auto;
+    top: 20%;
+    left: 30%;
+    width: 35%;
+    border-style: solid;
+    background-color: rgb(40, 42, 54);
+    padding: 10px 10px 10px 10px;
+}
+
+.CollaborateMenu > span {
+    font-size: x-large;
+    color: white;
+}
+
+.CollaborateMenu > .btn {
+    float: right;
+    margin-left: 1%;
+}

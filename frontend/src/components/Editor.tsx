@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import MarkdownBlock from './MarkdownBlock';
 import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
+import CollaborateMenu from './CollaborateMenu';
 import Button from 'react-bootstrap/Button';
 import FileSaver from 'file-saver';
 
@@ -23,7 +24,8 @@ interface State {
             }
         }
     },
-    selectedFile: File | null
+    selectedFile: File | null,
+    showCollaborateMenu: boolean
 };
 
 class TextBlock {
@@ -50,7 +52,8 @@ export default class Editor extends React.Component<Props, State> {
         this.state = {
             paragraphs: documentBlocks,
             cursors: { self: {block: -1, selection: {start: -1, end: -1 } } },
-            selectedFile: null
+            selectedFile: null,
+            showCollaborateMenu: false
         };
 
         this.blockRefs = {};
@@ -181,7 +184,7 @@ export default class Editor extends React.Component<Props, State> {
         });
     }
 
-    private handleExport() {
+    public handleExport() {
         let text = this.state.paragraphs
             .slice(0, this.state.paragraphs.length - 1)
             .join("\n");
@@ -189,17 +192,42 @@ export default class Editor extends React.Component<Props, State> {
         FileSaver.saveAs(data, "README.md");
     }
 
-   render() {
+    public notifyEditClose() {
+        requestAnimationFrame(() => {
+            this.setState({showCollaborateMenu: false})}
+        );
+    }
+
+    public handleCollaborate() {
+        requestAnimationFrame(() => {
+            this.setState({showCollaborateMenu: true})}
+        );
+    }
+
+    render() {
         return (
             <div className="Editor" id="editor"
-                    onClick={(e) => { this.handleBlockFocus(-1); }}>
+                    onClick={(e) => this.handleBlockFocus(-1) }>
                 <div className="Toolbar">
                     <Button
                         variant="secondary"
-                        onClick={() => {this.handleExport()}}>
+                        onClick={() => this.handleExport()}>
                             Export
                     </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={() => this.handleCollaborate()}
+                    >
+                        Collaborate
+                    </Button>
                 </div>
+                {this.state.showCollaborateMenu && (
+                    <CollaborateMenu
+                        notifyEditClose={() => this.notifyEditClose()}
+                        shareableUrl="dummy link" 
+                    />
+                )}
+                
                 <div className="TextBlocks">
                     {
                         this.state.paragraphs.map((paragraph, idx) => {
