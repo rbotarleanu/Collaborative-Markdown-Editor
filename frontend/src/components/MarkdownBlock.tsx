@@ -3,6 +3,8 @@ import '../styles/MarkdownBlock.css';
 import TextareaAutosize from 'react-textarea-autosize';
 import RenderableMarkdownBlock from './RenderableMarkdownBlock';
 
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
+
 
 type updateBlockInfoFn = (
     blockId: number, text: string,
@@ -30,9 +32,10 @@ export default class MarkdownBlock extends React.Component<Props, State> {
     private switchFocusToNextBlock: (id: number, reverse?: boolean) => void;
     private updateBlockInfo: updateBlockInfoFn;
     private id: number;
-    private textAreaRef: HTMLTextAreaElement | null;
+    private textAreaRef: typeof ContentEditable | null;
     private _isMounted: boolean = false;
     private HOTKEY_DELTA = 2000;
+    private textAreaInnerRef: React.RefObject<HTMLElement>;
 
     constructor(props: Props) {
         super(props);
@@ -49,6 +52,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.switchFocusToNextBlock = props.switchFocusToNextBlock;
         this.id = props.id;
         this.textAreaRef = null;
+        this.textAreaInnerRef = React.createRef();
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -65,7 +69,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this._isMounted = false;
     }
 
-    handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    handleChange(e: ContentEditableEvent) {
         if (!e.target) {
             return;
         }
@@ -79,20 +83,41 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.notifyInFocus(this.id);
         this.setState({ inFocus: true });
         cursorPosition = cursorPosition >= 0 ? cursorPosition : this.state.text.length;
-
         requestAnimationFrame(() => {
             if (this.textAreaRef) {
-                this.textAreaRef.focus();
-                this.textAreaRef.setSelectionRange(cursorPosition, cursorPosition);
+                if (this.textAreaInnerRef.current && this.textAreaInnerRef.current.firstChild) {
+                    this.textAreaInnerRef.current.focus();
+                    let range = document.createRange();
+                    range.setStart(this.textAreaInnerRef.current.firstChild, cursorPosition);
+                    range.setEnd(this.textAreaInnerRef.current.firstChild, cursorPosition);
+                    window.getSelection()?.removeAllRanges();
+                    window.getSelection()?.addRange(range);
+                }
             }
         });
     }
 
-    private handleSelect(e: React.SyntheticEvent<HTMLTextAreaElement, Event>) {
-        let target = e.target as HTMLTextAreaElement;
+    private getEditableSelectionRange(): {selectionStart: number, selectionEnd: number} {
+        let selection = window.getSelection();
+        let selectionStart = 0;
+        let selectionEnd = 0;
+
+        if (selection !== null) {
+            selectionStart = selection.anchorOffset;
+            selectionEnd = selection.focusOffset;
+        }
+        
+        return {
+            selectionStart: selectionStart,
+            selectionEnd: selectionEnd
+        };
+    }
+
+    private handleSelect(e: React.SyntheticEvent) {
+        let selectionRange = this.getEditableSelectionRange();
         this.updateBlockInfo(
             this.id, this.state.text,
-            target.selectionStart, target.selectionEnd);
+            selectionRange.selectionStart, selectionRange.selectionEnd);
     }
 
     public handleOffFocus() {
@@ -101,11 +126,10 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         }
     }
 
-    private handleEditorKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    private handleEditorKeyPress(e: React.KeyboardEvent) {
         let newState = {...this.state};
         newState.lastKeyPressTime = e.timeStamp;
         newState.lastKeyPressed = e.key;
-
         switch(e.key) {
             case "Escape":
                 newState.inFocus = false;
@@ -120,13 +144,15 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                 }
                 break;
             case 'ArrowRight':
-                if (this.textAreaRef?.selectionEnd === this.state.text.length) {
+                var selectionRange = this.getEditableSelectionRange();
+                if (selectionRange.selectionEnd === this.state.text.length) {
                     newState.inFocus = false;
                     this.switchFocusToNextBlock(this.id);
                 }
                 break;
             case 'ArrowLeft':
-                if (this.textAreaRef?.selectionStart === 0) {
+                var selectionRange = this.getEditableSelectionRange();
+                if (selectionRange.selectionStart === 0) {
                     newState.inFocus = false;
                     this.switchFocusToNextBlock(this.id, true);
                 }
@@ -142,10 +168,8 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         return (
             <div className="MarkdownBlock">
                 {this.state.inFocus && 
-                    <TextareaAutosize
-                        value={this.state.text}
-                        onChange={(e) => {this.handleChange(e);}}
-                        onSelect={(e) => {this.handleSelect(e);}}
+                    <ContentEditable
+                        html={this.state.text}
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -154,9 +178,34 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                                 this.handleOnFocus();
                             }
                         }}
+                        onChange={(e) => {this.handleChange(e);}}
+                        onSelect={(e) => {this.handleSelect(e);}}
                         onKeyDown={(e) => {this.handleEditorKeyPress(e);}}
-                        ref={(ref) => this.textAreaRef=ref}
+                        ref={(ref: any) => this.textAreaRef=ref as typeof ContentEditable}
+                        innerRef={this.textAreaInnerRef}
                     />
+                    // <EditableTextDisplay
+                    //     text={this.state.text}
+                    //     onClick={(e) => {
+                    //         e.preventDefault();
+                    //         e.stopPropagation();
+
+                    //         if (!this.state.inFocus) {
+                    //             this.handleOnFocus();
+                    //         }
+                    //     }}
+                        // value={this.state.text}
+                        // onChange={(e) => {this.handleChange(e);}}
+                        // onSelect={(e) => {this.handleSelect(e);}}
+                        // onClick={(e) => {
+                        //     e.preventDefault();
+                        //     e.stopPropagation();
+
+                        //     if (!this.state.inFocus) {
+                        //         this.handleOnFocus();
+                        //     }
+                        // }}
+                    // />
                 }
                 {!this.state.inFocus &&
                     <RenderableMarkdownBlock
