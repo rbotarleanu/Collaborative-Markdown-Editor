@@ -1,10 +1,14 @@
 import React from 'react';
 import '../styles/MarkdownBlock.css';
-import TextareaAutosize from 'react-textarea-autosize';
 import RenderableMarkdownBlock from './RenderableMarkdownBlock';
 
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 
+
+type SelectionRange = {
+    selectionStart: number,
+    selectionEnd: number
+};
 
 type updateBlockInfoFn = (
     blockId: number, text: string,
@@ -85,19 +89,36 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         cursorPosition = cursorPosition >= 0 ? cursorPosition : this.state.text.length;
         requestAnimationFrame(() => {
             if (this.textAreaRef) {
-                if (this.textAreaInnerRef.current && this.textAreaInnerRef.current.firstChild) {
-                    this.textAreaInnerRef.current.focus();
-                    let range = document.createRange();
-                    range.setStart(this.textAreaInnerRef.current.firstChild, cursorPosition);
-                    range.setEnd(this.textAreaInnerRef.current.firstChild, cursorPosition);
-                    window.getSelection()?.removeAllRanges();
-                    window.getSelection()?.addRange(range);
+                if (!this.textAreaInnerRef.current) {
+                    return;
                 }
+                
+                let childEl: ChildNode;
+                if (cursorPosition === this.state.text.length) {
+                    if (!this.textAreaInnerRef.current.lastChild) {
+                        return;
+                    }
+
+                    childEl = this.textAreaInnerRef.current.lastChild;
+                } else {
+                    if (!this.textAreaInnerRef.current.firstChild) {
+                        return;
+                    }
+
+                    childEl = this.textAreaInnerRef.current.firstChild;
+                }
+
+                this.textAreaInnerRef.current.focus();
+                let range = document.createRange();
+                range.setStart(childEl, cursorPosition);
+                range.setEnd(childEl, cursorPosition);
+                window.getSelection()?.removeAllRanges();
+                window.getSelection()?.addRange(range);
             }
         });
     }
 
-    private getEditableSelectionRange(): {selectionStart: number, selectionEnd: number} {
+    private getEditableSelectionRange(): SelectionRange {
         let selection = window.getSelection();
         let selectionStart = 0;
         let selectionEnd = 0;
@@ -130,6 +151,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         let newState = {...this.state};
         newState.lastKeyPressTime = e.timeStamp;
         newState.lastKeyPressed = e.key;
+        var selectionRange: SelectionRange; 
         switch(e.key) {
             case "Escape":
                 newState.inFocus = false;
@@ -144,14 +166,14 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                 }
                 break;
             case 'ArrowRight':
-                var selectionRange = this.getEditableSelectionRange();
+                selectionRange = this.getEditableSelectionRange();
                 if (selectionRange.selectionEnd === this.state.text.length) {
                     newState.inFocus = false;
                     this.switchFocusToNextBlock(this.id);
                 }
                 break;
             case 'ArrowLeft':
-                var selectionRange = this.getEditableSelectionRange();
+                selectionRange = this.getEditableSelectionRange();
                 if (selectionRange.selectionStart === 0) {
                     newState.inFocus = false;
                     this.switchFocusToNextBlock(this.id, true);
@@ -184,28 +206,6 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                         ref={(ref: any) => this.textAreaRef=ref as typeof ContentEditable}
                         innerRef={this.textAreaInnerRef}
                     />
-                    // <EditableTextDisplay
-                    //     text={this.state.text}
-                    //     onClick={(e) => {
-                    //         e.preventDefault();
-                    //         e.stopPropagation();
-
-                    //         if (!this.state.inFocus) {
-                    //             this.handleOnFocus();
-                    //         }
-                    //     }}
-                        // value={this.state.text}
-                        // onChange={(e) => {this.handleChange(e);}}
-                        // onSelect={(e) => {this.handleSelect(e);}}
-                        // onClick={(e) => {
-                        //     e.preventDefault();
-                        //     e.stopPropagation();
-
-                        //     if (!this.state.inFocus) {
-                        //         this.handleOnFocus();
-                        //     }
-                        // }}
-                    // />
                 }
                 {!this.state.inFocus &&
                     <RenderableMarkdownBlock

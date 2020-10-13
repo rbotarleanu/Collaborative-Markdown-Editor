@@ -18,6 +18,7 @@
     height: 4em;
     color: white;
     border-style: hidden hidden solid hidden;
+    display: flex;
 }
 
 .Toolbar > .btn {

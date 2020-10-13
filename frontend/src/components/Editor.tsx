@@ -5,6 +5,7 @@ import MarkdownBlock from './MarkdownBlock';
 import { interpretBlockType } from '../utils/MarkdownBlockMatching';
 import { MarkdownBlockTypes } from '../utils/MarkdownBlockTypes';
 import CollaborateMenu from './CollaborateMenu';
+import UserBar from './UserBar';
 import Button from 'react-bootstrap/Button';
 import FileSaver from 'file-saver';
 
@@ -25,7 +26,8 @@ interface State {
         }
     },
     selectedFile: File | null,
-    showCollaborateMenu: boolean
+    showCollaborateMenu: boolean,
+    users: Array<string>
 };
 
 class TextBlock {
@@ -53,7 +55,8 @@ export default class Editor extends React.Component<Props, State> {
             paragraphs: documentBlocks,
             cursors: { self: {block: -1, selection: {start: -1, end: -1 } } },
             selectedFile: null,
-            showCollaborateMenu: false
+            showCollaborateMenu: false,
+            users: []
         };
 
         this.blockRefs = {};
@@ -220,6 +223,7 @@ export default class Editor extends React.Component<Props, State> {
                     >
                         Collaborate
                     </Button>
+                    <UserBar users={this.state.users}/>
                 </div>
                 {this.state.showCollaborateMenu && (
                     <CollaborateMenu
@@ -227,7 +231,6 @@ export default class Editor extends React.Component<Props, State> {
                         shareableUrl="dummy link" 
                     />
                 )}
-                
                 <div className="TextBlocks">
                     {
                         this.state.paragraphs.map((paragraph, idx) => {
