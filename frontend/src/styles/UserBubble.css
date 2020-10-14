@@ -4,3 +4,8 @@ svg {
     margin-left: 1px;
     overflow-x: visible;
 }
+
+text {
+    paint-order: stroke;
+    stroke: rgb(40, 42, 54);
+}

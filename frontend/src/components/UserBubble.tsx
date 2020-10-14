@@ -44,7 +44,7 @@ export default class UserBubble extends React.Component<Props, State> {
                     cy="17"
                     stroke="white"
                     strokeWidth="2"
-                    fill="blue"/>
+                    fill={this.state.userColor.getRGB()}/>
                 <text
                     textAnchor="middle"
                     fill="white"

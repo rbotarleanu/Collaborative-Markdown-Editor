@@ -2,7 +2,6 @@
     margin-bottom: 1%;
     margin-top: 1%;
     overflow-x: scroll;
-    position: relative;
     white-space: nowrap;
     float: right;
     width: 100%;
@@ -10,20 +9,22 @@
 }
 
 .UserIcon {
-    overflow: none;
+    overflow: visible;
     display: inline;
+    position: relative;
 }
 
 .HoverName {
     margin-top: 7px;
     margin-left: -15px;
     position: absolute;
-    display: inline;
+    display: inline-block;
     color: white;
     background-color: rgb(40, 42, 54);
     border-radius: 10px;
     border: 1px solid white;
     transition: 0.6s;
+    z-index: 10;
 }
 
 .HoverName > span {
