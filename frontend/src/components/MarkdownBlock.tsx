@@ -1,9 +1,26 @@
 import React from 'react';
 import '../styles/MarkdownBlock.css';
 import RenderableMarkdownBlock from './RenderableMarkdownBlock';
+import Color from '../utils/Color';
+
 
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 
+
+type CursorPosition = {
+    block: number,
+    start: number,
+    end: number
+};
+
+type Cursors = {
+    [user: string]: {
+        [block: string]: {
+            start: number,
+            end: number
+        }
+    }
+};
 
 type SelectionRange = {
     selectionStart: number,
@@ -19,7 +36,9 @@ interface State {
     inFocus: boolean,
     cursorPos: {x: number, y: number},
     lastKeyPressed: string,
-    lastKeyPressTime: number
+    lastKeyPressTime: number,
+    cursors: Cursors,
+    colorAssignments: {[user: string]: Color}
 };
 
 interface Props {
@@ -27,7 +46,9 @@ interface Props {
     id: number,
     notifyFocus: (id: number) => void
     updateBlockInfo: updateBlockInfoFn,
-    switchFocusToNextBlock: (id: number, reverse?: boolean) => void
+    switchFocusToNextBlock: (id: number, reverse?: boolean) => void,
+    cursors: Cursors,
+    colorAssignments: {[user: string]: Color}
 };
 
 export default class MarkdownBlock extends React.Component<Props, State> {
@@ -48,7 +69,9 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             inFocus: false,
             cursorPos: {x: 0, y: 0},
             lastKeyPressTime: 0,
-            lastKeyPressed: ""
+            lastKeyPressed: "",
+            cursors: this.selectCorrespondingCursors(props.cursors, props.id),
+            colorAssignments: props.colorAssignments
         };
 
         this.notifyInFocus = props.notifyFocus;
@@ -59,9 +82,35 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.textAreaInnerRef = React.createRef();
     }
 
+    selectCorrespondingCursors(cursors: Cursors, id: number) {
+        let usersOnBlock: Array<string> = [];
+        let relevantCursors: Cursors = {};
+        let idStr = id.toString();
+        Object.keys(cursors).map((user: string) => {
+            if (user === 'self' || cursors[user][idStr] === undefined) {
+                return null;
+            }
+
+            usersOnBlock.push(user);
+            return null;
+        });
+
+        usersOnBlock.map((user: string) => {
+            relevantCursors[user] = {...cursors[user]};
+            return null;
+        });
+
+        return relevantCursors;
+    }
+
     componentDidUpdate(prevProps: Props) {
-        if (prevProps.text !== this.props.text) {
-            this.setState({ text: this.props.text });
+        if (prevProps.text !== this.props.text ||
+            prevProps.cursors !== this.props.cursors) {
+            this.setState({
+                text: this.props.text,
+                cursors: this.selectCorrespondingCursors(
+                    this.props.cursors, this.props.id)
+            });
         }
     }
 
@@ -186,12 +235,53 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.setState(newState);
     }
 
+    private makeColoredContentEditableText(): string {
+        let indexColors: {[index: number]: Color} = {};
+        let idStr = this.id.toString();
+
+        Object.keys(this.state.cursors).forEach((user: string) => {
+            let selection = this.state.cursors[user][idStr];
+            let color = this.state.colorAssignments[user];
+
+            for (var i = selection.start; i <= selection.end; ++i) {
+                indexColors[i] = color;
+            }
+        });
+
+        let i = 0;
+        let formattedText = "";
+        while (i < this.state.text.length) {
+            if (indexColors[i] === undefined) {
+                formattedText += this.state.text[i];
+                i += 1;
+                continue;
+            }
+
+            let j = i + 1;
+            let color = indexColors[i];
+            while (j < this.state.text.length) {
+                if (indexColors[i] === indexColors[j]) {
+                    j += 1;
+                } else {
+                    break;
+                }
+            }
+
+            formattedText += "<span style=\"color:" + color.getRGB() +  "\">";
+            formattedText += this.state.text.substr(i, j - i);
+            formattedText += "</span>";
+            i = j;
+        }
+
+        return formattedText;
+    }
+
     render() {
         return (
             <div className="MarkdownBlock">
                 {this.state.inFocus && 
                     <ContentEditable
-                        html={this.state.text}
+                        html={this.makeColoredContentEditableText()}
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();

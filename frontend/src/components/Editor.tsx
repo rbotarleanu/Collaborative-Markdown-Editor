@@ -8,6 +8,7 @@ import CollaborateMenu from './CollaborateMenu';
 import UserBar from './UserBar';
 import Button from 'react-bootstrap/Button';
 import FileSaver from 'file-saver';
+import Color, {ColorPresets} from '../utils/Color';
 
 
 interface Props {
@@ -18,8 +19,7 @@ interface State {
     paragraphs: Array<string>,
     cursors: {
         [user: string]: {
-            block: number,
-            selection: {
+            [block: string]: {
                 start: number,
                 end: number
             }
@@ -27,7 +27,8 @@ interface State {
     },
     selectedFile: File | null,
     showCollaborateMenu: boolean,
-    users: Array<string>
+    users: Array<string>,
+    userColors: Array<Color>
 };
 
 class TextBlock {
@@ -45,21 +46,30 @@ export default class Editor extends React.Component<Props, State> {
 
     private blockRefs: { [ref: number]: MarkdownBlock };
     private DUMMY_BLOCK = "Click here to edit...";
+    private userBarRef: UserBar | null;
 
     constructor(props: Props) {
         super(props);
         var documentBlocks = this.splitDocumentIntoBlocks(props.text);
         documentBlocks.push(this.DUMMY_BLOCK);
 
+        let users = ["John Barrow", "Marcel Bibi", "Caroline Xavier","Jack Brand", "Marcel Col", "Claudia","John Barrow", "Marcel Bibi", "Caroline Xavier","John Barrow"];
+
         this.state = {
             paragraphs: documentBlocks,
-            cursors: { self: {block: -1, selection: {start: -1, end: -1 } } },
+            cursors: {
+                self: {
+                    '-1': { start: -1, end: -1 }
+                }
+            },
             selectedFile: null,
             showCollaborateMenu: false,
-            users: []
+            users: users,
+            userColors: this.generateColors(users)
         };
 
         this.blockRefs = {};
+        this.userBarRef = null;
     }
 
     private splitDocumentIntoBlocks(doc: string): Array<string> {
@@ -96,6 +106,39 @@ export default class Editor extends React.Component<Props, State> {
         }
 
         return mergedBlocks;
+    }
+
+    generateColors(names: Array<string>): Array<Color> {
+        let colorAssignments: {[name: string]: Color} = {};
+        let colorToNames: {[color: string]: string} = {};
+
+        names.forEach((name: string, idx: number) => {
+            if (colorAssignments[name] !== undefined) {
+                return;
+            }
+
+            for (idx = 0; idx < ColorPresets.length; ++idx) {
+                let choice = ColorPresets[idx];
+                if (colorToNames[choice.getRGB()] === undefined) {
+                    colorAssignments[name] = choice;
+                    colorToNames[choice.getRGB()] = name;
+                    break;
+                }
+            }
+        });
+
+        return names.map((name) => colorAssignments[name]);
+    }
+
+    private getColorAssignments(): {[name: string]: Color} {
+        let colorAssignments: {[name: string]: Color} = {};
+
+        this.state.users.map((name: string, idx: number) => {
+            colorAssignments[name] = this.state.userColors[idx];
+            return null;
+        });
+
+        return colorAssignments;
     }
 
     private cleanUpParagraphs(paragraphs: Array<string>, focusedBlockIdx: number): Array<string> {
@@ -153,10 +196,12 @@ export default class Editor extends React.Component<Props, State> {
 
         var newState = {...this.state};
         newState.paragraphs = this.cleanUpParagraphs(newState.paragraphs, focusedBlockIdx);
+        let numStr = focusedBlockIdx.toString();
 
-        newState.cursors.self = {
-            block: focusedBlockIdx,
-            selection: {start: -1, end: -1}
+        newState.cursors.self = {};
+        newState.cursors.self[numStr] = {
+            start: -1,
+            end: -1
         };
     
         this.setState(newState);
@@ -167,12 +212,12 @@ export default class Editor extends React.Component<Props, State> {
                                   selectionEnd: number): void {
         var newState = this.state;
         newState.paragraphs[blockId] = text;
-        newState.cursors.self = {
-            block: blockId,
-            selection: {
-                start: selectionStart,
-                end: selectionEnd
-            }
+        let blockIdStr = blockId.toString();
+        
+        newState.cursors.self = {};
+        newState.cursors.self[blockIdStr] = {
+            start: selectionStart,
+            end: selectionEnd
         };
         this.setState(newState);
     }
@@ -223,7 +268,10 @@ export default class Editor extends React.Component<Props, State> {
                     >
                         Collaborate
                     </Button>
-                    <UserBar users={this.state.users}/>
+                    <UserBar
+                        users={this.state.users}
+                        colors={this.state.userColors}
+                    />
                 </div>
                 {this.state.showCollaborateMenu && (
                     <CollaborateMenu
@@ -246,6 +294,8 @@ export default class Editor extends React.Component<Props, State> {
                                         (blockId: number, text: string, selectionStart: number, selectionEnd: number) =>
                                         this.updateBlockInformation(blockId, text, selectionStart, selectionEnd)
                                     }
+                                    cursors={this.state.cursors}
+                                    colorAssignments={this.getColorAssignments()}
                                     ref={(ref) => {
                                         if (ref) {
                                             this.blockRefs[idx]=ref
