@@ -32,10 +32,14 @@ export default class UserBar extends React.Component<Props, State> {
         };
     }
 
+    public static makeNick(userName: string) {
+        let names = userName.split(' ');
+        return names.map((name: string) => name[0]).join("");
+    }
+
     generateNicknames(users: Array<string>): Array<string> {
         return users.map((userName) => {
-            let names = userName.split(' ');
-            return names.map((name: string) => name[0]).join("");
+            return UserBar.makeNick(userName);
         });
     }
 

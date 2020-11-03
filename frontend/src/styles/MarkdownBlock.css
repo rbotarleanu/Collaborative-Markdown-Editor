@@ -4,9 +4,35 @@
     margin-top: 10px;
     color: white;
     height: auto;
+    display: table;
 }
 
 textarea {
     width: 100%;
     resize: none;
+}
+
+.Content {
+    position: relative;
+    width: 90em;
+    height: 100%;
+    display: table-cell;
+}
+
+.ActiveUsers {
+    width: 9.5em;
+    white-space: nowrap;
+    float: left;
+    text-align: center;
+    display: table-cell;
+    flex: 1;
+    margin-right: 1em;
+}
+
+.ActiveUsers > span {
+    display: inline;
+    float: right;
+    overflow-x: scroll;
+    transform: scale(-13, 1.2);
+    margin-right: 13px;
 }

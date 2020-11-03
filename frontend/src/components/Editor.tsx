@@ -9,26 +9,40 @@ import UserBar from './UserBar';
 import Button from 'react-bootstrap/Button';
 import FileSaver from 'file-saver';
 import Color, {ColorPresets} from '../utils/Color';
+import BackendUtils from '../utils/BackendUtils';
 
 
 interface Props {
     text: string
 };
 
+type Cursors = {
+    [user: string]: {
+        [block: string]: {
+            start: number,
+            end: number
+        }
+    }
+}
+
+type MarshalledEditorState = {
+    paragraphs: Array<string>
+    cursors: Cursors
+};
+
+export type EditorState = {
+    editorState: MarshalledEditorState, 
+    documentId: string
+};
+
 interface State {
     paragraphs: Array<string>,
-    cursors: {
-        [user: string]: {
-            [block: string]: {
-                start: number,
-                end: number
-            }
-        }
-    },
+    cursors: Cursors,
     selectedFile: File | null,
     showCollaborateMenu: boolean,
     users: Array<string>,
-    userColors: Array<Color>
+    userColors: Array<Color>,
+    documentId: string
 };
 
 class TextBlock {
@@ -47,13 +61,14 @@ export default class Editor extends React.Component<Props, State> {
     private blockRefs: { [ref: number]: MarkdownBlock };
     private DUMMY_BLOCK = "Click here to edit...";
     private userBarRef: UserBar | null;
+    private backendUtils = new BackendUtils();
 
     constructor(props: Props) {
         super(props);
         var documentBlocks = this.splitDocumentIntoBlocks(props.text);
         documentBlocks.push(this.DUMMY_BLOCK);
 
-        let users = ["John Barrow", "Marcel Bibi", "Caroline Xavier","Jack Brand", "Marcel Col", "Claudia","John Barrow", "Marcel Bibi", "Caroline Xavier","John Barrow"];
+        let users: Array<string> = [];
 
         this.state = {
             paragraphs: documentBlocks,
@@ -62,9 +77,10 @@ export default class Editor extends React.Component<Props, State> {
                     '-1': { start: -1, end: -1 }
                 }
             },
-            selectedFile: null,
+            selectedFile: null, 
             showCollaborateMenu: false,
             users: users,
+            documentId: "some-room",
             userColors: this.generateColors(users)
         };
 
@@ -108,7 +124,7 @@ export default class Editor extends React.Component<Props, State> {
         return mergedBlocks;
     }
 
-    generateColors(names: Array<string>): Array<Color> {
+    private generateColors(names: Array<string>): Array<Color> {
         let colorAssignments: {[name: string]: Color} = {};
         let colorToNames: {[color: string]: string} = {};
 
@@ -167,7 +183,7 @@ export default class Editor extends React.Component<Props, State> {
         return paragraphs;
     }
 
-    public handleSwitchToNextFocusBlock(currentBlockIdx: number, reverse: boolean = false): void {
+    private handleSwitchToNextFocusBlock(currentBlockIdx: number, reverse: boolean = false): void {
         var newState = {...this.state};
         newState.paragraphs = this.cleanUpParagraphs(newState.paragraphs,
                                                      currentBlockIdx);
@@ -182,7 +198,7 @@ export default class Editor extends React.Component<Props, State> {
         });
     }
 
-    public handleBlockFocus(focusedBlockIdx: number): void {
+    private handleBlockFocus(focusedBlockIdx: number): void {
         Object.keys(this.blockRefs).forEach((idx: string) => {
             let idxToNum = parseInt(idx);
             if (idxToNum === focusedBlockIdx) {
@@ -207,7 +223,7 @@ export default class Editor extends React.Component<Props, State> {
         this.setState(newState);
     }
 
-    public updateBlockInformation(blockId: number, text: string,
+    private updateBlockInformation(blockId: number, text: string,
                                   selectionStart: number,
                                   selectionEnd: number): void {
         var newState = this.state;
@@ -232,7 +248,7 @@ export default class Editor extends React.Component<Props, State> {
         });
     }
 
-    public handleExport() {
+    private handleExport() {
         let text = this.state.paragraphs
             .slice(0, this.state.paragraphs.length - 1)
             .join("\n");
@@ -240,16 +256,36 @@ export default class Editor extends React.Component<Props, State> {
         FileSaver.saveAs(data, "README.md");
     }
 
-    public notifyEditClose() {
+    private notifyEditClose() {
         requestAnimationFrame(() => {
             this.setState({showCollaborateMenu: false})}
         );
     }
 
-    public handleCollaborate() {
+    private handleCollaborate() {
         requestAnimationFrame(() => {
             this.setState({showCollaborateMenu: true})}
         );
+    }
+
+    private marshallEditorState(): EditorState {
+        let editorState = {
+            documentId: this.state.documentId,
+            editorState: {
+                cursors: this.state.cursors,
+                paragraphs: this.state.paragraphs,
+            }
+        };
+
+        this.backendUtils.pushEditorState(editorState);
+        return editorState;
+    }
+
+    private updateEditorState(editorState: EditorState) {
+        this.setState({
+            paragraphs: editorState.editorState.paragraphs,
+            cursors: editorState.editorState.cursors
+        });
     }
 
     render() {
@@ -267,6 +303,25 @@ export default class Editor extends React.Component<Props, State> {
                         onClick={() => this.handleCollaborate()}
                     >
                         Collaborate
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={() => this.marshallEditorState()}
+                    >
+                        Serialize
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={() => {
+                            let editorState = this.backendUtils.getEditorState(
+                                this.state.documentId);
+                            editorState.then((editorStateResponse) => {
+                                let editorState = editorStateResponse.data;
+                                this.updateEditorState(editorState);
+                            });
+                        }}
+                    >
+                        Deserialize
                     </Button>
                     <UserBar
                         users={this.state.users}

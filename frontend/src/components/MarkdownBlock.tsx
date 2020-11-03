@@ -3,9 +3,11 @@ import '../styles/MarkdownBlock.css';
 import RenderableMarkdownBlock from './RenderableMarkdownBlock';
 import Color from '../utils/Color';
 
-
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
 
+let COLOR_SPAN_START_REGEX = /(<span style="background-color:rgb\(\d+,\d+,\d+\)">)/g;
+let SPAN_START_REGEX = /(<span>)/g;
+let SPAN_STOP_REGEX = /<\/span>/g;
 
 type CursorPosition = {
     block: number,
@@ -38,7 +40,9 @@ interface State {
     lastKeyPressed: string,
     lastKeyPressTime: number,
     cursors: Cursors,
-    colorAssignments: {[user: string]: Color}
+    colorAssignments: {[user: string]: Color},
+    activeUsers: Array<string>,
+    userColors: Array<Color>
 };
 
 interface Props {
@@ -62,16 +66,24 @@ export default class MarkdownBlock extends React.Component<Props, State> {
     private HOTKEY_DELTA = 2000;
     private textAreaInnerRef: React.RefObject<HTMLElement>;
 
+
     constructor(props: Props) {
         super(props);
+
+        let cursors = this.selectCorrespondingCursors(props.cursors, props.id);
+        let users = Object.keys(cursors);
+        let userColors = users.map((user: string) => props.colorAssignments[user]);
+
         this.state = {
-            text: props.text,
+            text: props.text.trim(),
             inFocus: false,
             cursorPos: {x: 0, y: 0},
             lastKeyPressTime: 0,
             lastKeyPressed: "",
-            cursors: this.selectCorrespondingCursors(props.cursors, props.id),
-            colorAssignments: props.colorAssignments
+            cursors: cursors,
+            colorAssignments: props.colorAssignments,
+            activeUsers: users,
+            userColors: userColors
         };
 
         this.notifyInFocus = props.notifyFocus;
@@ -107,7 +119,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         if (prevProps.text !== this.props.text ||
             prevProps.cursors !== this.props.cursors) {
             this.setState({
-                text: this.props.text,
+                text: this.props.text.trim(),
                 cursors: this.selectCorrespondingCursors(
                     this.props.cursors, this.props.id)
             });
@@ -131,11 +143,57 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         // is also triggered.
         this.setState({ text: e.target.value });
     }
+    
+    private getSelectionContainerElement() {
+        var range, sel, container;
+
+        sel = window.getSelection();
+
+        if (!sel) {
+            return null;
+        }
+
+        if (sel.getRangeAt) {
+            if (sel.rangeCount > 0) {
+                range = sel.getRangeAt(0);
+            }
+        } else {
+            // Old WebKit selection object has no getRangeAt, so
+            // create a range from other selection properties
+            range = document.createRange();
+
+            if (sel.anchorNode) {
+                range.setStart(sel.anchorNode, sel.anchorOffset);
+            }
+            if (sel.focusNode) {
+                range.setEnd(sel.focusNode, sel.focusOffset);
+            }
+
+            // Handle the case when the selection was selected backwards (from the end to the start in the document)
+            if (range.collapsed !== sel.isCollapsed) {
+                if (sel.focusNode) {
+                    range.setStart(sel.focusNode, sel.focusOffset);
+                }
+                if (sel.anchorNode) {
+                    range.setEnd(sel.anchorNode, sel.anchorOffset);
+                }
+            }
+        }
+
+        if (range) {
+            container = range.commonAncestorContainer;
+
+            // Check if the container is a text node and return its parent if so
+            return container.nodeType === 3 ? container.parentNode : container;
+        }   
+    }
+    
 
     public handleOnFocus(cursorPosition: number = 0) {
         this.notifyInFocus(this.id);
         this.setState({ inFocus: true });
         cursorPosition = cursorPosition >= 0 ? cursorPosition : this.state.text.length;
+
         requestAnimationFrame(() => {
             if (this.textAreaRef) {
                 if (!this.textAreaInnerRef.current) {
@@ -143,12 +201,16 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                 }
                 
                 let childEl: ChildNode;
-                if (cursorPosition === this.state.text.length) {
+                if (cursorPosition > 0) {
                     if (!this.textAreaInnerRef.current.lastChild) {
                         return;
                     }
 
                     childEl = this.textAreaInnerRef.current.lastChild;
+
+                    if (childEl.firstChild?.nodeValue) {
+                        cursorPosition = childEl.firstChild.nodeValue.length;
+                    }
                 } else {
                     if (!this.textAreaInnerRef.current.firstChild) {
                         return;
@@ -156,15 +218,27 @@ export default class MarkdownBlock extends React.Component<Props, State> {
 
                     childEl = this.textAreaInnerRef.current.firstChild;
                 }
-
-                this.textAreaInnerRef.current.focus();
-                let range = document.createRange();
-                range.setStart(childEl, cursorPosition);
-                range.setEnd(childEl, cursorPosition);
-                window.getSelection()?.removeAllRanges();
-                window.getSelection()?.addRange(range);
+                
+                this.setCursorAtPosition(childEl, cursorPosition);
             }
         });
+    }
+
+    private setCursorAtPosition(childEl: Node, cursorPosition: number) {
+        if (!childEl || !this.textAreaInnerRef.current) {
+            return;
+        }
+
+        this.textAreaInnerRef.current.focus();
+        let range = document.createRange();
+        if (childEl.firstChild) {
+            childEl = childEl.firstChild;
+        }
+
+        range.setStart(childEl, cursorPosition);
+        range.setEnd(childEl, cursorPosition);
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
     }
 
     private getEditableSelectionRange(): SelectionRange {
@@ -176,7 +250,7 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             selectionStart = selection.anchorOffset;
             selectionEnd = selection.focusOffset;
         }
-        
+
         return {
             selectionStart: selectionStart,
             selectionEnd: selectionEnd
@@ -196,11 +270,18 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         }
     }
 
+    private removeStylingFromText(text: string): string {
+        return text.replace(SPAN_START_REGEX, "")
+                   .replace(SPAN_STOP_REGEX, "")
+                   .replace(COLOR_SPAN_START_REGEX, "");
+    }
+
     private handleEditorKeyPress(e: React.KeyboardEvent) {
         let newState = {...this.state};
         newState.lastKeyPressTime = e.timeStamp;
         newState.lastKeyPressed = e.key;
         var selectionRange: SelectionRange; 
+        var childNode: Node | null | undefined;
         switch(e.key) {
             case "Escape":
                 newState.inFocus = false;
@@ -216,14 +297,19 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                 break;
             case 'ArrowRight':
                 selectionRange = this.getEditableSelectionRange();
-                if (selectionRange.selectionEnd === this.state.text.length) {
+                childNode = this.getSelectionContainerElement();
+                if (childNode === this.textAreaInnerRef.current?.lastChild &&
+                        childNode && childNode.firstChild &&
+                        selectionRange.selectionStart === childNode.firstChild.nodeValue?.length) {
                     newState.inFocus = false;
                     this.switchFocusToNextBlock(this.id);
                 }
                 break;
             case 'ArrowLeft':
                 selectionRange = this.getEditableSelectionRange();
-                if (selectionRange.selectionStart === 0) {
+                childNode = this.getSelectionContainerElement();
+                if (childNode === this.textAreaInnerRef.current?.firstChild &&
+                        selectionRange.selectionStart === 0) {
                     newState.inFocus = false;
                     this.switchFocusToNextBlock(this.id, true);
                 }
@@ -235,7 +321,11 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         this.setState(newState);
     }
 
-    private makeColoredContentEditableText(): string {
+    private addColorStylingToText(text: string): string {
+        if (text.indexOf('<span>') !== -1) {
+            return text;
+        }
+
         let indexColors: {[index: number]: Color} = {};
         let idStr = this.id.toString();
 
@@ -244,22 +334,34 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             let color = this.state.colorAssignments[user];
 
             for (var i = selection.start; i <= selection.end; ++i) {
-                indexColors[i] = color;
+                if (indexColors[i] === undefined) {
+                    indexColors[i] = color;
+                } else {
+                    indexColors[i] = indexColors[i].combine(color);
+                }
             }
         });
 
         let i = 0;
-        let formattedText = "";
-        while (i < this.state.text.length) {
+        let formattedText = "<span>";
+        let previousColor: Color | null = null;
+        // let formattedText = "";
+        let inTextBlock = true;
+        while (i < text.length) {
             if (indexColors[i] === undefined) {
-                formattedText += this.state.text[i];
+                if (!inTextBlock) {
+                    inTextBlock = true;
+                    formattedText += "</span><span>";
+                }
+                formattedText += text[i];
                 i += 1;
                 continue;
             }
 
+            inTextBlock = false;
             let j = i + 1;
             let color = indexColors[i];
-            while (j < this.state.text.length) {
+            while (j < text.length) {
                 if (indexColors[i] === indexColors[j]) {
                     j += 1;
                 } else {
@@ -267,11 +369,17 @@ export default class MarkdownBlock extends React.Component<Props, State> {
                 }
             }
 
-            formattedText += "<span style=\"color:" + color.getRGB() +  "\">";
-            formattedText += this.state.text.substr(i, j - i);
-            formattedText += "</span>";
+            if (!previousColor || previousColor !== color) {
+                formattedText += "</span>";
+                formattedText += "<span style=\"background-color:" + color.getRGB() +  "\">";
+                formattedText += text.substr(i, j - i);
+            } else {
+                formattedText += text.substr(i, j - 1);
+            }
+            previousColor = color;
             i = j;
         }
+        formattedText += "</span>";
 
         return formattedText;
     }
@@ -279,30 +387,44 @@ export default class MarkdownBlock extends React.Component<Props, State> {
     render() {
         return (
             <div className="MarkdownBlock">
-                {this.state.inFocus && 
-                    <ContentEditable
-                        html={this.makeColoredContentEditableText()}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
+                <div className="ActiveUsers">
+                    {this.state.activeUsers.map((user: string, idx: number) => {
+                        return (
+                            <span
+                                key={"active-user-" + idx}
+                                style={{color: this.state.userColors[idx].getRGB()}}
+                            >
+                                {"|"}
+                            </span>
+                        );
+                    })}
+                </div>
+                <div className="Content">
+                    {this.state.inFocus && 
+                        <ContentEditable
+                            html={this.addColorStylingToText(this.state.text)}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
 
-                            if (!this.state.inFocus) {
-                                this.handleOnFocus();
-                            }
-                        }}
-                        onChange={(e) => {this.handleChange(e);}}
-                        onSelect={(e) => {this.handleSelect(e);}}
-                        onKeyDown={(e) => {this.handleEditorKeyPress(e);}}
-                        ref={(ref: any) => this.textAreaRef=ref as typeof ContentEditable}
-                        innerRef={this.textAreaInnerRef}
-                    />
-                }
-                {!this.state.inFocus &&
-                    <RenderableMarkdownBlock
-                        text={this.state.text}
-                        onFocus={() => this.handleOnFocus()}
-                    />
-                }
+                                if (!this.state.inFocus) {
+                                    this.handleOnFocus();
+                                }
+                            }}
+                            onChange={(e) => {this.handleChange(e);}}
+                            onSelect={(e) => {this.handleSelect(e);}}
+                            onKeyDown={(e) => {this.handleEditorKeyPress(e);}}
+                            ref={(ref: any) => this.textAreaRef=ref as typeof ContentEditable}
+                            innerRef={this.textAreaInnerRef}
+                        />
+                    }
+                    {!this.state.inFocus &&
+                        <RenderableMarkdownBlock
+                            text={this.state.text}
+                            onFocus={() => this.handleOnFocus()}
+                        />
+                    }
+                </div>
             </div>
         )
     }

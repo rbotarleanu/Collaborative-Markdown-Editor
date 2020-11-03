@@ -1,4 +1,5 @@
 import React from 'react';
+import PlainTextBlock from './PlainTextBlock';
 
 
 interface Props {
@@ -50,15 +51,15 @@ export default class HeadingBlock extends React.Component<Props, State> {
     renderHeading(text: string, headingLevel: number) {
         switch(headingLevel) {
             case 1:
-                return (<h1>{text}</h1>)
+                return (<h1><PlainTextBlock text={text} /></h1>)
             case 2:
-                return (<h2>{text}</h2>)
+                return (<h2><PlainTextBlock text={text} /></h2>)
             case 3:
-                return (<h3>{text}</h3>)
+                return (<h3><PlainTextBlock text={text} /></h3>)
             case 4:
-                return (<h4>{text}</h4>)
+                return (<h4><PlainTextBlock text={text} /></h4>)
             default:
-                return (<h5>{text}</h5>)
+                return (<h5><PlainTextBlock text={text} /></h5>)
         }
     }
 

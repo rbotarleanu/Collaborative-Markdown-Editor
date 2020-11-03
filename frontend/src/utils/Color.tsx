@@ -13,6 +13,14 @@ export default class Color {
     getRGB() {
         return "rgb(" + [this.red, this.green, this.blue].join(',') + ")";
     }
+
+    combine(other: Color) {
+        return new Color(
+            Math.round(.5 * (this.red + other.red)),
+            Math.round(.5 * (this.green + other.green)),
+            Math.round(.5 * (this.blue + other.blue))
+        );
+    }
 };
 
 export const ColorPresets = [
