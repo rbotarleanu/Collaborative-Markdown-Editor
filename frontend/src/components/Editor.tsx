@@ -304,25 +304,6 @@ export default class Editor extends React.Component<Props, State> {
                     >
                         Collaborate
                     </Button>
-                    <Button
-                        variant="secondary"
-                        onClick={() => this.marshallEditorState()}
-                    >
-                        Serialize
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        onClick={() => {
-                            let editorState = this.backendUtils.getEditorState(
-                                this.state.documentId);
-                            editorState.then((editorStateResponse) => {
-                                let editorState = editorStateResponse.data;
-                                this.updateEditorState(editorState);
-                            });
-                        }}
-                    >
-                        Deserialize
-                    </Button>
                     <UserBar
                         users={this.state.users}
                         colors={this.state.userColors}
