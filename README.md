@@ -1,6 +1,6 @@
 # Collaborative-Markdown-Editor
 
-![alt text](docs/screenshot_intro.png "Title")
+![Intro shot](docs/screenshot_intro.png)
 This project is work in progress.
 
 The aim of this project is to offer a collaborative way of editing Markdown files inline.
