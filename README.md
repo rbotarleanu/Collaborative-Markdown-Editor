@@ -25,3 +25,8 @@ The Markdown file is rendered on-the-fly, allowing for easier workflows for mult
 - Markdown document marhshalling/unmarshalling for synchronization between users
 - Back-end that can handle multiple documents with multiple users separately, through different "rooms"
 - More in-depth bug testing
+
+### Known Issues
+- Deleting all the contents of a block doesn't cause the block to be removed
+- Modifying a table block by adding some text on the second line beaks the table formatting and then it never recovers (Note: same thing happens to the unordered list as well, probably with any cell that isn't a PlainTextBlock)
+- Users should not be able to edit the selections of other users
