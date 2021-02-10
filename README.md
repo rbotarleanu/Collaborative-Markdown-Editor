@@ -27,5 +27,5 @@ The Markdown file is rendered on-the-fly, allowing for easier workflows for mult
 - More in-depth bug testing
 
 ### Known Issues
-- Modifying a table block by adding some text on the second line beaks the table formatting and then it never recovers (Note: same thing happens to the unordered list as well, probably with any cell that isn't a PlainTextBlock)
-- Users should not be able to edit the selections of other users
+- While editing a selected zone (colored) the cursor behaves oddly and doesn't let you edit anything except for adding to the end
+    + Users should not be able to edit the selections of other users

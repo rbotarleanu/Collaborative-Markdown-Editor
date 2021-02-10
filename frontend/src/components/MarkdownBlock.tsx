@@ -139,9 +139,10 @@ export default class MarkdownBlock extends React.Component<Props, State> {
             return;
         }
 
-        // We don't need to update the block info here since a selection event
-        // is also triggered.
-        this.setState({ text: e.target.value });
+        let newText = e.target.value;
+        newText = newText.replace(/[<|>]\/?span[<|>]/g, "")
+
+        this.setState({ text: newText });
     }
     
     private getSelectionContainerElement() {
@@ -345,7 +346,6 @@ export default class MarkdownBlock extends React.Component<Props, State> {
         let i = 0;
         let formattedText = "<span>";
         let previousColor: Color | null = null;
-        // let formattedText = "";
         let inTextBlock = true;
         while (i < text.length) {
             if (indexColors[i] === undefined) {

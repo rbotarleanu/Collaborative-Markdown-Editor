@@ -68,16 +68,14 @@ export default class Editor extends React.Component<Props, State> {
         var documentBlocks = this.splitDocumentIntoBlocks(props.text);
         documentBlocks.push(this.DUMMY_BLOCK);
 
-        let users = ["John Barrow", "Marcel Bibi", "Caroline Xavier","Jack Brand", "Marcel Col", "Claudia","John Barrow", "Marcel Bibi", "Caroline Xavier","John Barrow"];
-
         this.state = {
             paragraphs: documentBlocks,
-            cursors: {"self":{"-1":{"start":-1,"end":-1}},"John Barrow":{"0":{"start":2,"end":5},"2":{"start":20,"end":30}},"Marcel Bibi":{"2":{"start":50,"end":70}},"Caroline Xavier":{"2":{"start":40,"end":60}},"Jack Brand":{"5":{"start":0,"end":5000}},"Marcel Col":{"2":{"start":5,"end":5}}},
+            cursors: {"self": {"-1": {"start": -1, "end": - 1}}},
             selectedFile: null, 
             showCollaborateMenu: false,
-            users: users,
+            users: [],
             documentId: "some-room",
-            userColors: this.generateColors(users)
+            userColors: this.generateColors([])
         };
 
         this.blockRefs = {};
