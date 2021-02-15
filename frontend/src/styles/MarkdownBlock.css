@@ -14,18 +14,16 @@ textarea {
 
 .Content {
     position: relative;
-    width: 90em;
     height: 100%;
     display: table-cell;
 }
 
 .ActiveUsers {
-    width: 9.5em;
     white-space: nowrap;
-    float: left;
     text-align: center;
-    display: table-cell;
     flex: 1;
+    float: left;
+    width: 9.3vw;
     margin-right: 1em;
 }
 

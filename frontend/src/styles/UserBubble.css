@@ -3,6 +3,9 @@ svg {
     width: 40px;
     margin-left: 1px;
     overflow-x: visible;
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 35px;
 }
 
 text {
