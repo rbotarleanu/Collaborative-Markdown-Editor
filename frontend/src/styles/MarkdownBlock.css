@@ -32,7 +32,7 @@ textarea {
 .ActiveUsers > span {
     display: inline;
     float: right;
-    overflow-x: scroll;
+    overflow-x: hidden;
     transform: scale(-13, 1.2);
     margin-right: 13px;
 }
